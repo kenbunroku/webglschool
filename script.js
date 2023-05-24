@@ -1,5 +1,5 @@
-import * as THREE from './lib/three.module.js'
-import { OrbitControls } from './lib/OrbitControls.js'
+import * as THREE from './src/lib/three.module.js'
+import { OrbitControls } from './src/lib/OrbitControls.js'
 
 window.addEventListener(
   'DOMContentLoaded',
