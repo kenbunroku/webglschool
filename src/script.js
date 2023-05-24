@@ -1,5 +1,5 @@
-import * as THREE from '../lib/three.module.js'
-import { OrbitControls } from '../lib/OrbitControls.js'
+import * as THREE from './lib/three.module.js'
+import { OrbitControls } from './lib/OrbitControls.js'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -20,7 +20,7 @@ class App3 {
       near: 0.1,
       far: 100.0,
       x: 2.0,
-      y: -8.0,
+      y: -7.0,
       z: 5.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
