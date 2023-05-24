@@ -98,6 +98,17 @@ class App3 {
       },
       false,
     )
+
+    // Resize event
+    window.addEventListener(
+      'resize',
+      () => {
+        this.renderer.setSize(window.innerWidth, window.innerHeight)
+        this.camera.aspect = window.innerWidth / window.innerHeight
+        this.camera.updateProjectionMatrix()
+      },
+      false,
+    )
   }
 
   // init
