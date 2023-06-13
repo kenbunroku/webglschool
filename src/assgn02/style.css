@@ -1,0 +1,18 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+.text {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 16px;
+  z-index: 1;
+}
