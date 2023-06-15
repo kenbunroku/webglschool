@@ -1,5 +1,8 @@
 import * as THREE from '../lib/three.module.js'
 import { OrbitControls } from '../lib/OrbitControls.js'
+import { EffectComposer } from '../lib/EffectComposer.js'
+import { RenderPass } from '../lib/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import * as dat from 'lil-gui'
 
 window.addEventListener(
@@ -68,6 +71,9 @@ class App3 {
     this.boxArray
     this.controls
     this.axisHelper
+    this.composer
+    this.renderPass
+    this.unrealBloomPass
 
     this.render = this.render.bind(this)
 
@@ -165,6 +171,28 @@ class App3 {
     // control
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
+    // composer
+    const params = {
+      bloomStrength: 1.5,
+      bloomThreshold: 0.4,
+      bloomRadius: 0.85,
+    }
+
+    this.composer = new EffectComposer(this.renderer)
+    this.renderPass = new RenderPass(this.scene, this.camera)
+    this.composer.addPass(this.renderPass)
+    this.unrealBloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5,
+      0.4,
+      0.85,
+    )
+    this.unrealBloomPass.threshold = params.threshold
+    this.unrealBloomPass.strength = params.bloomStrength
+    this.unrealBloomPass.radius = params.bloomRadius
+    this.composer.addPass(this.unrealBloomPass)
+    this.unrealBloomPass.renderToScreen = true
+
     // axis helper
     const axesBarLength = 5.0
     this.axesHelper = new THREE.AxesHelper(axesBarLength)
@@ -183,8 +211,8 @@ class App3 {
 
     // rotate group around y axis
     const angle = (Date.now() / 10000) * Math.PI * 2
-    this.motorGroup.rotation.y = Math.sin(angle)
+    this.motorGroup.rotation.y = Math.sin(angle) * 0.5
 
-    this.renderer.render(this.scene, this.camera)
+    this.composer.render()
   }
 }
