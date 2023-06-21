@@ -23,8 +23,8 @@ class App3 {
       near: 0.1,
       far: 20.0,
       x: 0.0,
-      y: 2.0,
-      z: 10.0,
+      y: 0.0,
+      z: 12.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
@@ -74,6 +74,7 @@ class App3 {
     this.composer
     this.renderPass
     this.unrealBloomPass
+    this.boxes
 
     this.render = this.render.bind(this)
 
@@ -131,42 +132,47 @@ class App3 {
     )
     this.scene.add(this.ambientLight)
 
-    // material
-    this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM)
-
     // group
     this.bladeGroup = new THREE.Group()
     this.motorGroup = new THREE.Group()
     this.scene.add(this.bladegroup)
     this.scene.add(this.motorGroup)
 
-    // box
-    const BOX_COUNT = 20
-    const BOX_EDGE_LENGTH = 0.5
-    this.boxGeometry = new THREE.BoxGeometry(
-      BOX_EDGE_LENGTH,
-      BOX_EDGE_LENGTH * 1.61803398875,
-      0.1,
-    )
-    this.boxArray = []
-    for (let i = 0; i < BOX_COUNT; i++) {
-      const box = new THREE.Mesh(this.boxGeometry, this.material)
+    // boxes
+    this.boxes = []
 
-      // place box in circle
-      const angle = (i / BOX_COUNT) * Math.PI * 2
-      const radius = 5.0
-      box.position.x = Math.cos(angle) * radius
-      box.position.y = Math.sin(angle) * radius
-      box.position.z = 1.0
+    for (let i = 0; i < 3; i++) {
+      // material
+      this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM)
 
-      // calculate the angle between box position and origin
-      const angleToOrigin = Math.atan2(box.position.y, box.position.x)
-      box.rotation.z = angleToOrigin + 90 * (Math.PI / 180)
+      const BOX_COUNT = 15
+      const BOX_EDGE_LENGTH = 0.5
+      this.boxGeometry = new THREE.BoxGeometry(
+        BOX_EDGE_LENGTH,
+        BOX_EDGE_LENGTH * 1.61803398875,
+        0.1,
+      )
+      this.boxArray = []
+      for (let j = 0; j < BOX_COUNT; j++) {
+        const box = new THREE.Mesh(this.boxGeometry, this.material)
 
-      this.bladeGroup.add(box)
-      this.boxArray.push(box)
+        // place box in circle
+        const angle = (j / BOX_COUNT) * Math.PI * 2
+        const radius = 6.0 / (i + 1)
+        box.position.x = Math.cos(angle) * radius
+        box.position.y = Math.sin(angle) * radius
+        box.position.z = 6 - i * 2.0
+
+        // calculate the angle between box position and origin
+        const angleToOrigin = Math.atan2(box.position.y, box.position.x)
+        box.rotation.z = angleToOrigin + 90 * (Math.PI / 180)
+
+        this.bladeGroup.add(box)
+        this.boxArray.push(box)
+      }
+      this.motorGroup.add(this.bladeGroup)
+      this.boxes.push({ Blades: this.bladeGroup, Motor: this.motorGroup })
     }
-    this.motorGroup.add(this.bladeGroup)
 
     // control
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
