@@ -55,9 +55,7 @@ class App3 {
   }
 
   static get MATERIAL_PARAM() {
-    return {
-      color: 0x00209f,
-    }
+    return [{ color: 0x00209f }, { color: 0xffffff }, { color: 0xef4135 }]
   }
 
   constructor() {
@@ -143,7 +141,7 @@ class App3 {
 
     for (let i = 0; i < 3; i++) {
       // material
-      this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM)
+      this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM[i])
 
       const BOX_COUNT = 15
       const BOX_EDGE_LENGTH = 0.5
