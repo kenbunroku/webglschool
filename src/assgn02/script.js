@@ -139,6 +139,10 @@ class App3 {
     // boxes
     this.boxes = []
 
+    // debug
+    const gui = new dat.GUI()
+    const colorFolder = gui.addFolder('Colors')
+
     for (let i = 0; i < 3; i++) {
       // material
       this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM[i])
@@ -170,6 +174,13 @@ class App3 {
       }
       this.motorGroup.add(this.bladeGroup)
       this.boxes.push({ Blades: this.bladeGroup, Motor: this.motorGroup })
+
+      colorFolder
+        .addColor(App3.MATERIAL_PARAM[i], 'color')
+        .name(`Color ${i + 1}`)
+        .onChange(() => {
+          this.material.color.setHex(App3.MATERIAL_PARAM[i].color)
+        })
     }
 
     // control
@@ -201,9 +212,6 @@ class App3 {
     const axesBarLength = 5.0
     this.axesHelper = new THREE.AxesHelper(axesBarLength)
     this.scene.add(this.axesHelper)
-
-    // debug
-    const gui = new dat.GUI()
   }
 
   render() {
