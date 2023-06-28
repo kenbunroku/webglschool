@@ -73,9 +73,18 @@ class App3 {
     this.renderPass
     this.unrealBloomPass
     this.boxes
+    this.isPowerOn = false
+    this.rotationSpeed = 0.0
 
     this.render = this.render.bind(this)
 
+    // Click event
+    document.getElementById('power-btn').addEventListener('click', (e) => {
+      e.preventDefault()
+      this.isPowerOn = !this.isPowerOn // toggle power
+    })
+
+    // Resize event
     window.addEventListener(
       'resize',
       () => {
@@ -145,7 +154,8 @@ class App3 {
 
     for (let i = 0; i < 3; i++) {
       // material
-      this.material = new THREE.MeshLambertMaterial(App3.MATERIAL_PARAM[i])
+      this.material = new THREE.MeshStandardMaterial(App3.MATERIAL_PARAM[i])
+      this.material.metalness = 0.5
 
       const BOX_COUNT = 15
       const BOX_EDGE_LENGTH = 0.5
@@ -219,7 +229,13 @@ class App3 {
 
     this.controls.update()
 
-    this.bladeGroup.rotation.z += 0.02
+    if (this.isPowerOn) {
+      this.rotationSpeed = 0.02
+      this.bladeGroup.rotation.z += this.rotationSpeed
+    } else if (!this.isPowerOn && this.rotationSpeed > 0) {
+      this.rotationSpeed -= 0.0001
+      this.bladeGroup.rotation.z += this.rotationSpeed
+    }
 
     // rotate group around y axis
     const angle = (Date.now() / 10000) * Math.PI * 2
