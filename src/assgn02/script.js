@@ -22,9 +22,9 @@ class App3 {
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
       far: 40.0,
-      x: 0.0,
+      x: 10.0,
       y: 0.0,
-      z: 12.0,
+      z: 15.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
