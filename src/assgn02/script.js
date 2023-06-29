@@ -77,6 +77,12 @@ class App3 {
     this.powerOnTime = null
     this.rotationSpeed = 0.0
     this.clock = new THREE.Clock(false)
+    // params for UnrealBloomPass
+    this.params = {
+      bloomStrength: 1.5,
+      bloomThreshold: 0.04,
+      bloomRadius: 0.85,
+    }
 
     this.render = this.render.bind(this)
 
@@ -88,6 +94,28 @@ class App3 {
         this.clock.start()
       } else {
         this.clock.stop()
+      }
+    })
+    document.getElementById('speed-up-btn').addEventListener('click', (e) => {
+      e.preventDefault()
+      if (this.isPowerOn) {
+        this.rotationSpeed += 0.01
+
+        if (this.rotationSpeed > this.params.bloomThreshold) {
+          this.params.bloomStrength += 0.5
+          this.unrealBloomPass.strength = this.params.bloomStrength
+        }
+      }
+    })
+    document.getElementById('speed-down-btn').addEventListener('click', (e) => {
+      e.preventDefault()
+      if (this.isPowerOn) {
+        this.rotationSpeed -= 0.01
+
+        if (this.rotationSpeed > this.params.bloomThreshold) {
+          this.params.bloomStrength -= 0.5
+          this.unrealBloomPass.strength = this.params.bloomStrength
+        }
       }
     })
 
@@ -178,7 +206,7 @@ class App3 {
         const radius = 2.0 * (i + 1)
         box.position.x = Math.cos(angle) * radius
         box.position.y = Math.sin(angle) * radius
-        box.position.z = 1.5 * (i + 1)
+        box.position.z = 2.5 * (i + 1)
         // calculate the angle between box position and origin
         const angleToOrigin = Math.atan2(box.position.y, box.position.x)
         box.rotation.z = angleToOrigin + 90 * (Math.PI / 180)
@@ -208,12 +236,6 @@ class App3 {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // composer
-    const params = {
-      bloomStrength: 1.5,
-      bloomThreshold: 0.4,
-      bloomRadius: 0.85,
-    }
-
     this.composer = new EffectComposer(this.renderer)
     this.renderPass = new RenderPass(this.scene, this.camera)
     this.composer.addPass(this.renderPass)
@@ -223,16 +245,15 @@ class App3 {
       0.4,
       0.85,
     )
-    this.unrealBloomPass.threshold = params.threshold
-    this.unrealBloomPass.strength = params.bloomStrength
-    this.unrealBloomPass.radius = params.bloomRadius
+    this.unrealBloomPass.threshold = this.params.bloomThreshold
+    this.unrealBloomPass.strength = this.params.bloomStrength
+    this.unrealBloomPass.radius = this.params.bloomRadius
     this.composer.addPass(this.unrealBloomPass)
-    this.unrealBloomPass.renderToScreen = true
 
-    // axis helper
-    const axesBarLength = 5.0
-    this.axesHelper = new THREE.AxesHelper(axesBarLength)
-    this.scene.add(this.axesHelper)
+    // // axis helper
+    // const axesBarLength = 5.0
+    // this.axesHelper = new THREE.AxesHelper(axesBarLength)
+    // this.scene.add(this.axesHelper)
   }
 
   render() {
@@ -265,6 +286,10 @@ class App3 {
         box.isStarted = false
         box.previousAngle = box.angle
       }
+
+      Math.abs(this.rotationSpeed) >= this.unrealBloomPass.threshold
+        ? (this.unrealBloomPass.enabled = true)
+        : (this.unrealBloomPass.enabled = false)
     })
 
     this.composer.render()
