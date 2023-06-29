@@ -74,7 +74,9 @@ class App3 {
     this.unrealBloomPass
     this.boxes
     this.isPowerOn = false
+    this.powerOnTime = null
     this.rotationSpeed = 0.0
+    this.clock = new THREE.Clock(false)
 
     this.render = this.render.bind(this)
 
@@ -82,6 +84,11 @@ class App3 {
     document.getElementById('power-btn').addEventListener('click', (e) => {
       e.preventDefault()
       this.isPowerOn = !this.isPowerOn // toggle power
+      if (this.isPowerOn) {
+        this.clock.start()
+      } else {
+        this.clock.stop()
+      }
     })
 
     // Resize event
@@ -139,12 +146,6 @@ class App3 {
     )
     this.scene.add(this.ambientLight)
 
-    // group
-    this.bladeGroup = new THREE.Group()
-    this.motorGroup = new THREE.Group()
-    this.scene.add(this.bladegroup)
-    this.scene.add(this.motorGroup)
-
     // boxes
     this.boxes = []
 
@@ -153,6 +154,10 @@ class App3 {
     const colorFolder = gui.addFolder('Colors')
 
     for (let i = 0; i < 3; i++) {
+      // group
+      this.bladeGroup = new THREE.Group()
+      this.motorGroup = new THREE.Group()
+
       // material
       this.material = new THREE.MeshStandardMaterial(App3.MATERIAL_PARAM[i])
       this.material.metalness = 0.5
@@ -170,11 +175,10 @@ class App3 {
 
         // place box in circle
         const angle = (j / BOX_COUNT) * Math.PI * 2
-        const radius = 6.0 / (i + 1)
+        const radius = 2.0 * (i + 1)
         box.position.x = Math.cos(angle) * radius
         box.position.y = Math.sin(angle) * radius
-        box.position.z = 6 - i * 2.0
-
+        box.position.z = 1.0 * (i + 1)
         // calculate the angle between box position and origin
         const angleToOrigin = Math.atan2(box.position.y, box.position.x)
         box.rotation.z = angleToOrigin + 90 * (Math.PI / 180)
@@ -183,7 +187,12 @@ class App3 {
         this.boxArray.push(box)
       }
       this.motorGroup.add(this.bladeGroup)
-      this.boxes.push({ Blades: this.bladeGroup, Motor: this.motorGroup })
+      this.boxes.push({
+        Blades: this.bladeGroup,
+        Motor: this.motorGroup,
+        isStarted: false,
+        startDelay: i * 1,
+      })
 
       colorFolder
         .addColor(App3.MATERIAL_PARAM[i], 'color')
@@ -191,6 +200,9 @@ class App3 {
         .onChange(() => {
           this.material.color.setHex(App3.MATERIAL_PARAM[i].color)
         })
+
+      this.scene.add(this.bladeoup)
+      this.scene.add(this.motorGroup)
     }
 
     // control
@@ -229,17 +241,31 @@ class App3 {
 
     this.controls.update()
 
-    if (this.isPowerOn) {
-      this.rotationSpeed = 0.02
-      this.bladeGroup.rotation.z += this.rotationSpeed
-    } else if (!this.isPowerOn && this.rotationSpeed > 0) {
-      this.rotationSpeed -= 0.0001
-      this.bladeGroup.rotation.z += this.rotationSpeed
-    }
+    this.boxes.forEach((box, i) => {
+      if (this.isPowerOn) {
+        const elapsedTime = this.clock.getElapsedTime()
+        if (elapsedTime > box.startDelay && !box.isStarted) {
+          this.rotationSpeed = 0.02
+          box.isStarted = true
+        }
 
-    // rotate group around y axis
-    const angle = (Date.now() / 10000) * Math.PI * 2
-    this.motorGroup.rotation.y = Math.sin(angle) * 0.5
+        if (box.isStarted) {
+          console.log(box, i)
+          // rotate blades around z axis
+          box.Blades.rotation.z += this.rotationSpeed
+
+          // rotate group around y axis to swing the fan
+          const angle = (elapsedTime / 10000) * Math.PI * 2
+          box.Motor.rotation.y = Math.sin(angle) * 0.5
+        }
+      } else if (!this.isPowerOn && this.rotationSpeed > 0) {
+        this.rotationSpeed -= 0.0001
+        box.Blades.rotation.z += this.rotationSpeed
+      } else if (!this.isPowerOn && this.rotationSpeed <= 0) {
+        this.rotationSpeed = 0
+        box.isStarted = false
+      }
+    })
 
     this.composer.render()
   }
