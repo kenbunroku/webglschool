@@ -21,7 +21,7 @@ class App3 {
       fovy: 60,
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
-      far: 20.0,
+      far: 40.0,
       x: 0.0,
       y: 0.0,
       z: 12.0,
@@ -178,7 +178,7 @@ class App3 {
         const radius = 2.0 * (i + 1)
         box.position.x = Math.cos(angle) * radius
         box.position.y = Math.sin(angle) * radius
-        box.position.z = 1.0 * (i + 1)
+        box.position.z = 1.5 * (i + 1)
         // calculate the angle between box position and origin
         const angleToOrigin = Math.atan2(box.position.y, box.position.x)
         box.rotation.z = angleToOrigin + 90 * (Math.PI / 180)
@@ -191,7 +191,7 @@ class App3 {
         Blades: this.bladeGroup,
         Motor: this.motorGroup,
         isStarted: false,
-        startDelay: i * 1,
+        startDelay: i * 1.0,
       })
 
       colorFolder
@@ -201,7 +201,6 @@ class App3 {
           this.material.color.setHex(App3.MATERIAL_PARAM[i].color)
         })
 
-      this.scene.add(this.bladeoup)
       this.scene.add(this.motorGroup)
     }
 
@@ -247,16 +246,16 @@ class App3 {
         if (elapsedTime > box.startDelay && !box.isStarted) {
           this.rotationSpeed = 0.02
           box.isStarted = true
+          box.previousAngle = box.previousAngle || 0
         }
 
         if (box.isStarted) {
-          console.log(box, i)
-          // rotate blades around z axis
           box.Blades.rotation.z += this.rotationSpeed
 
-          // rotate group around y axis to swing the fan
-          const angle = (elapsedTime / 10000) * Math.PI * 2
-          box.Motor.rotation.y = Math.sin(angle) * 0.5
+          box.angle =
+            box.previousAngle +
+            ((elapsedTime - box.startDelay) / 10) * 2 * Math.PI
+          box.Motor.rotation.y = Math.sin(box.angle) * 0.5
         }
       } else if (!this.isPowerOn && this.rotationSpeed > 0) {
         this.rotationSpeed -= 0.0001
@@ -264,6 +263,7 @@ class App3 {
       } else if (!this.isPowerOn && this.rotationSpeed <= 0) {
         this.rotationSpeed = 0
         box.isStarted = false
+        box.previousAngle = box.angle
       }
     })
 
