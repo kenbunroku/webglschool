@@ -20,6 +20,7 @@
   "homepage": "https://github.com/kenbunroku/webglschool#readme",
   "dependencies": {
     "lil-gui": "^0.18.1",
+    "postprocessing": "^6.32.1",
     "three": "^0.153.0"
   },
   "devDependencies": {
