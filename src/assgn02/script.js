@@ -3,7 +3,7 @@ import { OrbitControls } from '../lib/OrbitControls.js'
 import { EffectComposer } from '../lib/EffectComposer.js'
 import { RenderPass } from '../lib/RenderPass.js'
 import { UnrealBloomPass } from '../lib/UnrealBloomPass.js'
-import * as dat from '../lil-gui'
+import * as dat from 'lil-gui'
 
 window.addEventListener(
   'DOMContentLoaded',
