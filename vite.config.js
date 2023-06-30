@@ -13,8 +13,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'src/index.html'),
-        assgn01: resolve(__dirname, 'src/assgn01/index.html'),
-        assgn02: resolve(__dirname, 'src/assgn02/index.html'),
+        assgn01: resolve(__dirname, 'src/assgn01/'),
+        assgn02: resolve(__dirname, 'src/assgn02/'),
       },
     },
   },
