@@ -2,8 +2,8 @@ export default {
   root: 'src/',
   publicDir: '../public/',
   base: './',
-  buid: {
-    outDir: '../dist/',
+  build: {
+    outDir: '../dist',
     emptyOutDir: true,
     sourcemap: true,
   },
