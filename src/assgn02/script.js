@@ -1,8 +1,8 @@
-import * as THREE from '../lib/three.module.js'
-import { OrbitControls } from '../lib/OrbitControls.js'
-import { EffectComposer } from '../lib/EffectComposer.js'
-import { RenderPass } from '../lib/RenderPass.js'
-import { UnrealBloomPass } from '../lib/UnrealBloomPass.js'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import * as dat from 'lil-gui'
 
 window.addEventListener(
