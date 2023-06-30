@@ -1,3 +1,5 @@
 export default {
-  // your configuration here
+  optimizeDeps: {
+    include: ['lil-gui'],
+  },
 }
