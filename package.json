@@ -1,28 +1,18 @@
 {
   "name": "webglschool",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
-    "build": "vite build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kenbunroku/webglschool.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/kenbunroku/webglschool/issues"
-  },
-  "homepage": "https://github.com/kenbunroku/webglschool#readme",
-  "dependencies": {
-    "lil-gui": "^0.18.1",
-    "three": "^0.153.0"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^4.3.9"
+  },
+  "dependencies": {
+    "lil-gui": "^0.18.2",
+    "three": "^0.154.0"
   }
 }
