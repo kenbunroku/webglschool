@@ -174,12 +174,13 @@ class App3 {
     )
     this.scene.add(this.ambientLight)
 
-    // boxes
-    this.boxes = []
-
     // debug
     const gui = new dat.GUI()
     const colorFolder = gui.addFolder('Colors')
+    const bloomFolder = gui.addFolder('Bloom')
+
+    // boxes
+    this.boxes = []
 
     for (let i = 0; i < 3; i++) {
       // group
@@ -221,7 +222,6 @@ class App3 {
         isStarted: false,
         startDelay: i * 1.0,
       })
-
       colorFolder
         .addColor(App3.MATERIAL_PARAM[i], 'color')
         .name(`Color ${i + 1}`)
@@ -231,6 +231,17 @@ class App3 {
 
       this.scene.add(this.motorGroup)
     }
+
+    bloomFolder
+      .add(this.params, 'bloomThreshold', 0.0, 0.1, 0.01)
+      .onChange((value) => {
+        this.unrealBloomPass.strength = Number(value)
+      })
+    bloomFolder
+      .add(this.params, 'bloomRadius', 0.0, 5.0, 0.0)
+      .onChange((value) => {
+        this.unrealBloomPass.strength = Number(value)
+      })
 
     // control
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
