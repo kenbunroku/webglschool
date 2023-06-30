@@ -1,5 +1,10 @@
 export default {
-  optimizeDeps: {
-    include: ['lil-gui'],
+  root: 'src/',
+  publicDir: '../public/',
+  base: './',
+  buid: {
+    outDir: '../dist/',
+    emptyOutDir: true,
+    sourcemap: true,
   },
 }
