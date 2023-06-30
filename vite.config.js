@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   root: 'src',
-  base: '/webglschool/',
+  base: '/vite-deploy-demo/',
   server: {
     port: 3000,
   },
