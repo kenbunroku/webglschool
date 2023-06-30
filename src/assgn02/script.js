@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as THREE from '../lib/three.module.js'
 import { OrbitControls } from '../lib/OrbitControls.js'
 import { EffectComposer } from '../lib/EffectComposer.js'
 import { RenderPass } from '../lib/RenderPass.js'
