@@ -10,12 +10,12 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        index: resolve(__dirname, 'src/index.html'),
-        assgn01: resolve(__dirname, 'src/assgn01/index.html'),
-        assgn02: resolve(__dirname, 'src/assgn02/index.html'),
-      },
-    },
+    // rollupOptions: {
+    //   input: {
+    //     index: resolve(__dirname, 'src/index.html'),
+    //     assgn01: resolve(__dirname, 'src/assgn01/index.html'),
+    //     assgn02: resolve(__dirname, 'src/assgn02/index.html'),
+    //   },
+    // },
   },
 })
