@@ -54,17 +54,12 @@ class App3 {
     }
   }
 
-  static get MATERIAL_PARAM() {
-    return [{ color: 0x00209f }, { color: 0xffffff }, { color: 0xef4135 }]
-  }
-
   constructor() {
     this.renderer
     this.scene
     this.camera
     this.directionalLight
     this.ambientLight
-    this.material
     this.boxGeometry
     this.boxArray
     this.controls
@@ -77,6 +72,11 @@ class App3 {
     this.powerOnTime = null
     this.rotationSpeed = 0.0
     this.clock = new THREE.Clock(false)
+    this.colors = [
+      { color: 0xef4135 },
+      { color: 0xffffff },
+      { color: 0x3c5de2 },
+    ]
     // params for UnrealBloomPass
     this.params = {
       bloomStrength: 1.5,
@@ -188,8 +188,8 @@ class App3 {
       this.motorGroup = new THREE.Group()
 
       // material
-      this.material = new THREE.MeshStandardMaterial(App3.MATERIAL_PARAM[i])
-      this.material.metalness = 0.5
+      const material = new THREE.MeshStandardMaterial(this.colors[i])
+      material.metalness = 0.8
 
       const BOX_COUNT = 15
       const BOX_EDGE_LENGTH = 0.5
@@ -200,7 +200,7 @@ class App3 {
       )
       this.boxArray = []
       for (let j = 0; j < BOX_COUNT; j++) {
-        const box = new THREE.Mesh(this.boxGeometry, this.material)
+        const box = new THREE.Mesh(this.boxGeometry, material)
 
         // place box in circle
         const angle = (j / BOX_COUNT) * Math.PI * 2
@@ -223,10 +223,10 @@ class App3 {
         startDelay: i * 1.0,
       })
       colorFolder
-        .addColor(App3.MATERIAL_PARAM[i], 'color')
+        .addColor(this.colors[i], 'color')
         .name(`Color ${i + 1}`)
         .onChange(() => {
-          this.material.color.setHex(App3.MATERIAL_PARAM[i].color)
+          material.color.set(this.colors[i].color)
         })
 
       this.scene.add(this.motorGroup)
@@ -238,7 +238,7 @@ class App3 {
         this.unrealBloomPass.strength = Number(value)
       })
     bloomFolder
-      .add(this.params, 'bloomRadius', 0.0, 5.0, 0.0)
+      .add(this.params, 'bloomRadius', 0.0, 5.0, 0.05)
       .onChange((value) => {
         this.unrealBloomPass.strength = Number(value)
       })
@@ -272,7 +272,7 @@ class App3 {
 
     this.controls.update()
 
-    this.boxes.forEach((box, i) => {
+    this.boxes.forEach((box) => {
       if (this.isPowerOn) {
         const elapsedTime = this.clock.getElapsedTime()
         if (elapsedTime > box.startDelay && !box.isStarted) {
@@ -287,7 +287,7 @@ class App3 {
           box.angle =
             box.previousAngle +
             ((elapsedTime - box.startDelay) / 10) * 2 * Math.PI
-          box.Motor.rotation.y = Math.sin(box.angle) * 0.5
+          box.Motor.rotation.y = Math.sin(box.angle)
         }
       } else if (!this.isPowerOn && this.rotationSpeed > 0) {
         this.rotationSpeed -= 0.0001
@@ -297,11 +297,11 @@ class App3 {
         box.isStarted = false
         box.previousAngle = box.angle
       }
-
-      Math.abs(this.rotationSpeed) >= this.unrealBloomPass.threshold
-        ? (this.unrealBloomPass.enabled = true)
-        : (this.unrealBloomPass.enabled = false)
     })
+
+    Math.abs(this.rotationSpeed) > this.unrealBloomPass.threshold
+      ? (this.unrealBloomPass.enabled = true)
+      : (this.unrealBloomPass.enabled = false)
 
     this.composer.render()
   }
