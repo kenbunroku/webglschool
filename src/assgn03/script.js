@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
+import * as d3 from 'd3'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -15,13 +16,13 @@ window.addEventListener(
 class App3 {
   static get CAMERA_PARAM() {
     return {
-      fovy: 60,
+      fovy: 45,
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
-      far: 40.0,
+      far: 10000.0,
       x: 10.0,
       y: 0.0,
-      z: 15.0,
+      z: 2000.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
@@ -59,6 +60,11 @@ class App3 {
     this.directionalLight
     this.ambientLight
     this.axesHelper
+    this.lines = new THREE.Group()
+    this.lineMaterial = new THREE.LineBasicMaterial({
+      linewidth: 1,
+      color: 0xffffff,
+    })
 
     this.render = this.render.bind(this)
 
@@ -74,7 +80,82 @@ class App3 {
     )
   }
 
-  init() {
+  createLineFromCoords(coords) {
+    let lineGeom = new THREE.BufferGeometry()
+    let positions = []
+    for (let i = 0; i < coords.length; i++) {
+      let lat = coords[i].y
+      let lon = coords[i].x
+      let radius = App3.RENDERER_PARAM.height
+      let latRad = lat * (Math.PI / 180)
+      let lonRad = -lon * (Math.PI / 180)
+      let x = Math.cos(latRad) * Math.cos(lonRad) * radius
+      let y = Math.sin(latRad) * radius
+      let z = Math.cos(latRad) * Math.sin(lonRad) * radius
+      positions.push(x, y, z)
+    }
+
+    lineGeom.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(positions, 3),
+    )
+
+    return new THREE.Line(lineGeom, this.lineMaterial)
+  }
+
+  addGeoJsonFeaturesToScene(features) {
+    // geojson to threejs
+    for (let i = 0; i < features.length; i++) {
+      let feature = features[i]
+      let coords = []
+      for (let c = 0; c < feature.geometry.coordinates.length; c++) {
+        if (feature.geometry.type == ' Polygon') {
+          let coords = []
+          for (let s = 0; s < feature.geometry.coordinates[c].length; s++) {
+            let xy = {
+              x: feature.geometry.coordinates[c][s][0],
+              y: feature.geometry.coordinates[c][s][1],
+            }
+            coords.push(xy)
+          }
+
+          if (coords.length > 0) {
+            this.lines.add(this.coordinatesreateLineFromCoords(coords))
+          }
+        } else if (feature.geometry.type == 'MultiPolygon') {
+          for (let s = 0; s < feature.geometry.coordinates[c].length; s++) {
+            // each polygon in multipolygon:
+            let coords = []
+            for (
+              let m = 0;
+              m < feature.geometry.coordinates[c][s].length;
+              m++
+            ) {
+              let xy = {
+                x: feature.geometry.coordinates[c][s][m][0],
+                y: feature.geometry.coordinates[c][s][m][1],
+              }
+              coords.push(xy)
+            }
+          }
+        } else if (feature.geometry.type == 'LineString') {
+          let xy = {
+            x: feature.geometry.coordinates[c][0],
+            y: feature.geometry.coordinates[c][1],
+          }
+          coords.push(xy)
+        }
+      }
+      if (feature.geometry.type == 'LineString') {
+        if (coords.length > 0) {
+          this.lines.add(this.createLineFromCoords(coords))
+        }
+      }
+    }
+    this.scene.add(this.lines)
+  }
+
+  async init() {
     // renderer
     this.renderer = new THREE.WebGLRenderer()
     this.renderer.setClearColor(new THREE.Color(App3.RENDERER_PARAM.clearColor))
@@ -82,6 +163,7 @@ class App3 {
     const wrapper = document.querySelector('#webgl')
     wrapper.appendChild(this.renderer.domElement)
 
+    // scene
     this.scene = new THREE.Scene()
 
     // camera
@@ -90,6 +172,11 @@ class App3 {
       App3.CAMERA_PARAM.aspect,
       App3.CAMERA_PARAM.near,
       App3.CAMERA_PARAM.far,
+    )
+    this.camera.position.set(
+      App3.CAMERA_PARAM.x,
+      App3.CAMERA_PARAM.y,
+      App3.CAMERA_PARAM.z,
     )
     this.camera.lookAt(App3.CAMERA_PARAM.lookAt)
 
@@ -119,15 +206,23 @@ class App3 {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // axis helper
-    const axesBarLength = 5.0
+    const axesBarLength = 1000.0
     this.axesHelper = new THREE.AxesHelper(axesBarLength)
     this.scene.add(this.axesHelper)
+
+    const countryBoundaries = await d3.json(
+      'https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_BN_20M_2020_4326.geojson',
+    )
+
+    this.addGeoJsonFeaturesToScene(countryBoundaries.features)
   }
 
   render() {
     requestAnimationFrame(this.render)
 
     this.controls.update()
+
+    this.lines.rotation.y += 0.001
 
     this.renderer.render(this.scene, this.camera)
   }
