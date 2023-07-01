@@ -75,12 +75,12 @@ class App3 {
     this.colors = [
       { color: 0xef4135 },
       { color: 0xffffff },
-      { color: 0x3c5de2 },
+      { color: 0x0055a4 },
     ]
     // params for UnrealBloomPass
     this.params = {
       bloomStrength: 1.5,
-      bloomThreshold: 0.04,
+      bloomThreshold: 0.01,
       bloomRadius: 0.85,
     }
 
@@ -233,7 +233,7 @@ class App3 {
     }
 
     bloomFolder
-      .add(this.params, 'bloomThreshold', 0.0, 0.1, 0.01)
+      .add(this.params, 'bloomThreshold', 0.0, 0.1, 0.001)
       .onChange((value) => {
         this.unrealBloomPass.strength = Number(value)
       })
@@ -299,7 +299,7 @@ class App3 {
       }
     })
 
-    Math.abs(this.rotationSpeed) > this.unrealBloomPass.threshold
+    Math.abs(this.rotationSpeed) > 0.05
       ? (this.unrealBloomPass.enabled = true)
       : (this.unrealBloomPass.enabled = false)
 
