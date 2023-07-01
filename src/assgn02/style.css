@@ -7,6 +7,9 @@ html,
 body {
   overflow: hidden;
 }
+a {
+  color: #fff;
+}
 a:visited {
   color: #fff;
 }
