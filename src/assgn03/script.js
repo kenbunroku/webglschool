@@ -54,6 +54,14 @@ class App3 {
     }
   }
 
+  static get MATERIAL_PARAM() {
+    return { color: 0xffffff }
+  }
+
+  static get AIRPLANCE_DISTANCE() {
+    return 1000.0
+  }
+
   constructor() {
     this.renderer
     this.scene
@@ -62,12 +70,17 @@ class App3 {
     this.directionalLight
     this.ambientLight
     this.axesHelper
+
     this.lines = new THREE.Group()
     this.lineMaterial = new THREE.LineBasicMaterial({
       linewidth: 1,
       color: 0xffffff,
     })
     this.countryBoundaries
+
+    this.coneGeometry
+    this.airplane
+    this.airplaneMaterial
 
     this.render = this.render.bind(this)
 
@@ -207,6 +220,13 @@ class App3 {
       App3.AMBIENT_LIGHT_PARAM.intensity,
     )
     this.scene.add(this.ambientLight)
+
+    // airplane
+    this.coneGeometry = new THREE.ConeGeometry(10, 30, 32)
+    this.airplaneMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
+    this.airplane = new THREE.Mesh(this.coneGeometry, this.airplaneMaterial)
+    this.scene.add(this.airplane)
+    this.airplane.position.set(App3.AIRPLANCE_DISTANCE, 0, 0)
 
     // debug
     const gui = new dat.GUI()
