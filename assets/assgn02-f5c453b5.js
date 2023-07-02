@@ -1,4 +1,4 @@
-import{b as D,c as L,F as A,a as B,d as p,U as S,e as d,f as w,H as M,N as z,g as y,C as b,V as m,h as U,i as I,W as F,S as O,P as H,D as G,A as k,G as P,j as N,B as Q,O as V}from"./OrbitControls-047931be.js";import{G as W}from"./lil-gui.esm-aba6213a.js";const _={name:"CopyShader",uniforms:{tDiffuse:{value:null},opacity:{value:1}},vertexShader:`
+import{b as D,c as L,F as A,a as B,d as p,U as S,e as d,f as w,H as M,N as z,g as y,C as b,V as m,h as U,i as I,W as F,S as O,P as H,D as G,A as k,G as P,j as N,B as Q,O as V}from"./OrbitControls-b20a4410.js";import{G as W}from"./lil-gui.esm-aba6213a.js";const _={name:"CopyShader",uniforms:{tDiffuse:{value:null},opacity:{value:1}},vertexShader:`
 
 		varying vec2 vUv;
 
