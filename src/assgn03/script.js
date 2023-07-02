@@ -7,8 +7,10 @@ window.addEventListener(
   'DOMContentLoaded',
   () => {
     const app = new App3()
-    app.init()
-    app.render()
+    app.load().then(() => {
+      app.init()
+      app.render()
+    })
   },
   false,
 )
@@ -65,6 +67,7 @@ class App3 {
       linewidth: 1,
       color: 0xffffff,
     })
+    this.countryBoundaries
 
     this.render = this.render.bind(this)
 
@@ -155,6 +158,12 @@ class App3 {
     this.scene.add(this.lines)
   }
 
+  async load() {
+    return (this.countryBoundaries = await d3.json(
+      'https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_BN_20M_2020_4326.geojson',
+    ))
+  }
+
   async init() {
     // renderer
     this.renderer = new THREE.WebGLRenderer()
@@ -210,11 +219,7 @@ class App3 {
     this.axesHelper = new THREE.AxesHelper(axesBarLength)
     this.scene.add(this.axesHelper)
 
-    const countryBoundaries = await d3.json(
-      'https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_BN_20M_2020_4326.geojson',
-    )
-
-    this.addGeoJsonFeaturesToScene(countryBoundaries.features)
+    this.addGeoJsonFeaturesToScene(this.countryBoundaries.features)
   }
 
   render() {
