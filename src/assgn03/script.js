@@ -24,7 +24,7 @@ class App3 {
       far: 10000.0,
       x: 10.0,
       y: 0.0,
-      z: 2000.0,
+      z: 2500.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
@@ -58,7 +58,7 @@ class App3 {
     return { color: 0xffffff }
   }
 
-  static get AIRPLANCE_DISTANCE() {
+  static get AIRPLANE_DISTANCE() {
     return 1000.0
   }
 
@@ -81,6 +81,9 @@ class App3 {
     this.coneGeometry
     this.airplane
     this.airplaneMaterial
+    this.airplaneDirection
+
+    this.clock = new THREE.Clock()
 
     this.render = this.render.bind(this)
 
@@ -226,7 +229,9 @@ class App3 {
     this.airplaneMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
     this.airplane = new THREE.Mesh(this.coneGeometry, this.airplaneMaterial)
     this.scene.add(this.airplane)
-    this.airplane.position.set(App3.AIRPLANCE_DISTANCE, 0, 0)
+    this.airplane.scale.setScalar(3)
+    this.airplane.position.set(App3.AIRPLANE_DISTANCE, 0, 0)
+    this.airplaneDirection = new THREE.Vector3(0.0, 1.0, 0.0).normalize()
 
     // debug
     const gui = new dat.GUI()
@@ -248,6 +253,40 @@ class App3 {
     this.controls.update()
 
     this.lines.rotation.y += 0.001
+
+    const time = this.clock.getElapsedTime()
+    const newPosition = new THREE.Vector3(
+      Math.cos(time) * App3.AIRPLANE_DISTANCE,
+      0.0,
+      Math.sin(time) * App3.AIRPLANE_DISTANCE,
+    )
+
+    const previousDirection = this.airplaneDirection.clone()
+
+    // Calculate the direction vector from the previous position to the new position
+    const subVector = new THREE.Vector3().subVectors(
+      newPosition,
+      this.airplane.position,
+    )
+    subVector.normalize()
+
+    this.airplaneDirection.add(subVector)
+    this.airplaneDirection.normalize()
+    const direction = this.airplaneDirection.clone()
+    this.airplane.position.add(direction.multiplyScalar(15))
+
+    // Calculate the quaternion representing the rotation from the old direction to the new direction
+    const normalAxis = new THREE.Vector3().crossVectors(
+      previousDirection,
+      this.airplaneDirection,
+    )
+    normalAxis.normalize()
+
+    const cos = previousDirection.dot(this.airplaneDirection)
+    const radians = Math.acos(cos)
+    const qtn = new THREE.Quaternion().setFromAxisAngle(normalAxis, radians)
+
+    this.airplane.quaternion.premultiply(qtn)
 
     this.renderer.render(this.scene, this.camera)
   }
