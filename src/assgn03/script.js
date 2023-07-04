@@ -1,5 +1,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import * as dat from 'lil-gui'
 import * as d3 from 'd3'
 
@@ -55,11 +58,22 @@ class App3 {
   }
 
   static get MATERIAL_PARAM() {
-    return { color: 0xffffff }
+    return { color: 0xf006eff }
   }
 
   static get AIRPLANE_DISTANCE() {
     return 1000.0
+  }
+
+  static get TRAIL_MATERIAL_PARAM() {
+    return {
+      color: 0x006eff,
+      linewidth: 5,
+    }
+  }
+
+  static get TRAIL_LENGTH() {
+    return 50
   }
 
   constructor() {
@@ -71,6 +85,7 @@ class App3 {
     this.ambientLight
     this.axesHelper
 
+    // country boundaries
     this.lines = new THREE.Group()
     this.lineMaterial = new THREE.LineBasicMaterial({
       linewidth: 1,
@@ -78,10 +93,28 @@ class App3 {
     })
     this.countryBoundaries
 
+    // airplane
     this.coneGeometry
     this.airplane
     this.airplaneMaterial
     this.airplaneDirection
+
+    // trail
+    this.trail
+    this.trailMaterial
+    this.trailGeometry
+    this.trailVertices
+
+    // composer
+    this.composer
+    this.renderPass
+    this.unrealBloomPass
+    // params for UnrealBloomPass
+    this.params = {
+      bloomStrength: 1.5,
+      bloomThreshold: 0,
+      bloomRadius: 0.85,
+    }
 
     this.clock = new THREE.Clock()
 
@@ -233,8 +266,42 @@ class App3 {
     this.airplane.position.set(App3.AIRPLANE_DISTANCE, 0, 0)
     this.airplaneDirection = new THREE.Vector3(0.0, 1.0, 0.0).normalize()
 
+    // trail
+    this.trailVertices = []
+    this.trailMaterial = new THREE.LineBasicMaterial(App3.TRAIL_MATERIAL_PARAM)
+    this.trailGeometry = new THREE.BufferGeometry().setFromPoints(
+      this.trailVertices,
+    )
+    this.trail = new THREE.Line(this.trailGeometry, this.trailMaterial)
+    this.scene.add(this.trail)
+
     // debug
     const gui = new dat.GUI()
+
+    gui.addColor(App3.TRAIL_MATERIAL_PARAM, 'color').onChange((color) => {
+      this.airplaneMaterial.color.set(color)
+      this.trailMaterial.color.set(color)
+    })
+    gui.add(App3.TRAIL_MATERIAL_PARAM, 'linewidth', 1, 10).onChange((width) => {
+      this.trailMaterial.linewidth = Number(width)
+    })
+
+    const bloomFolder = gui.addFolder('Bloom')
+    bloomFolder
+      .add(this.params, 'bloomStrength', 0.0, 10, 0.1)
+      .onChange((value) => {
+        this.unrealBloomPass.strength = Number(value)
+      })
+    bloomFolder
+      .add(this.params, 'bloomThreshold', 0.0, 1, 0.001)
+      .onChange((value) => {
+        this.unrealBloomPass.threshold = Number(value)
+      })
+    bloomFolder
+      .add(this.params, 'bloomRadius', 0.0, 5.0, 0.05)
+      .onChange((value) => {
+        this.unrealBloomPass.radius = Number(value)
+      })
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -245,6 +312,22 @@ class App3 {
     this.scene.add(this.axesHelper)
 
     this.addGeoJsonFeaturesToScene(this.countryBoundaries.features)
+
+    // composer
+    this.composer = new EffectComposer(this.renderer)
+    this.renderPass = new RenderPass(this.scene, this.camera)
+    this.composer.addPass(this.renderPass)
+    this.unrealBloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5,
+      0.4,
+      0.85,
+    )
+    this.unrealBloomPass.threshold = this.params.bloomThreshold
+    this.unrealBloomPass.strength = this.params.bloomStrength
+    this.unrealBloomPass.radius = this.params.bloomRadius
+    this.composer.addPass(this.unrealBloomPass)
+    this.unrealBloomPass.renderToScreen = true
   }
 
   render() {
@@ -257,7 +340,7 @@ class App3 {
     const time = this.clock.getElapsedTime()
     const newPosition = new THREE.Vector3(
       Math.cos(time) * App3.AIRPLANE_DISTANCE,
-      0.0,
+      Math.cos(time) * App3.AIRPLANE_DISTANCE,
       Math.sin(time) * App3.AIRPLANE_DISTANCE,
     )
 
@@ -288,6 +371,14 @@ class App3 {
 
     this.airplane.quaternion.premultiply(qtn)
 
-    this.renderer.render(this.scene, this.camera)
+    // Update the trail
+    this.trailVertices.push(this.airplane.position.clone())
+    if (this.trailVertices.length > App3.TRAIL_LENGTH) {
+      this.trailVertices.shift()
+    }
+    this.trailGeometry.setFromPoints(this.trailVertices)
+
+    // this.renderer.render(this.scene, this.camera)
+    this.composer.render()
   }
 }
