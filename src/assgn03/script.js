@@ -354,7 +354,7 @@ class App3 {
     )
     subVector.normalize()
 
-    this.airplaneDirection.add(subVector)
+    this.airplaneDirection.add(subVector.multiplyScalar(1))
     this.airplaneDirection.normalize()
     const direction = this.airplaneDirection.clone()
     this.airplane.position.add(direction.multiplyScalar(15))
