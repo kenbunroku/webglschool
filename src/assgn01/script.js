@@ -39,7 +39,7 @@ class App3 {
   static get DIRECTIONAL_LIGHT_PARAM() {
     return {
       color: 0x009998,
-      intensity: 3.0,
+      intensity: 20.0,
       x: 1.0,
       y: 1.0,
       z: 1.0,
