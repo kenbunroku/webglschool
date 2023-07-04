@@ -235,12 +235,12 @@ class App3 {
     bloomFolder
       .add(this.params, 'bloomThreshold', 0.0, 0.1, 0.001)
       .onChange((value) => {
-        this.unrealBloomPass.strength = Number(value)
+        this.unrealBloomPass.threshold = Number(value)
       })
     bloomFolder
       .add(this.params, 'bloomRadius', 0.0, 5.0, 0.05)
       .onChange((value) => {
-        this.unrealBloomPass.strength = Number(value)
+        this.unrealBloomPass.radius = Number(value)
       })
 
     // control
