@@ -309,7 +309,9 @@ class App3 {
     // axis helper
     const axesBarLength = 1000.0
     this.axesHelper = new THREE.AxesHelper(axesBarLength)
+    this.axesHelper.visible = false
     this.scene.add(this.axesHelper)
+    gui.add(this.axesHelper, 'visible').name('Axes Helper')
 
     this.addGeoJsonFeaturesToScene(this.countryBoundaries.features)
 
