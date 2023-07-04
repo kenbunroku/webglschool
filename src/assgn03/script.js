@@ -109,12 +109,18 @@ class App3 {
     this.composer
     this.renderPass
     this.unrealBloomPass
+    this.finalComposer
     // params for UnrealBloomPass
     this.params = {
       bloomStrength: 1.5,
       bloomThreshold: 0,
       bloomRadius: 0.85,
     }
+
+    this.bloomLayer = new THREE.Layers()
+
+    this.darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' })
+    this.materials = {}
 
     this.clock = new THREE.Clock()
 
@@ -288,20 +294,13 @@ class App3 {
 
     const bloomFolder = gui.addFolder('Bloom')
     bloomFolder
-      .add(this.params, 'bloomStrength', 0.0, 10, 0.1)
+      .add(this.params, 'bloomStrength', 0.0, 3.0)
       .onChange((value) => {
         this.unrealBloomPass.strength = Number(value)
       })
-    bloomFolder
-      .add(this.params, 'bloomThreshold', 0.0, 1, 0.001)
-      .onChange((value) => {
-        this.unrealBloomPass.threshold = Number(value)
-      })
-    bloomFolder
-      .add(this.params, 'bloomRadius', 0.0, 5.0, 0.05)
-      .onChange((value) => {
-        this.unrealBloomPass.radius = Number(value)
-      })
+    bloomFolder.add(this.params, 'bloomThreshold', 0.0, 1).onChange((value) => {
+      this.unrealBloomPass.threshold = Number(value)
+    })
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -329,7 +328,7 @@ class App3 {
     this.unrealBloomPass.strength = this.params.bloomStrength
     this.unrealBloomPass.radius = this.params.bloomRadius
     this.composer.addPass(this.unrealBloomPass)
-    this.unrealBloomPass.renderToScreen = true
+    this.unrealBloomPass.renderToScreen = false
   }
 
   render() {
@@ -380,7 +379,6 @@ class App3 {
     }
     this.trailGeometry.setFromPoints(this.trailVertices)
 
-    // this.renderer.render(this.scene, this.camera)
     this.composer.render()
   }
 }
