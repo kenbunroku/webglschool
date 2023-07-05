@@ -119,9 +119,6 @@ class App3 {
 
     this.bloomLayer = new THREE.Layers()
 
-    this.darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' })
-    this.materials = {}
-
     this.clock = new THREE.Clock()
 
     this.render = this.render.bind(this)
@@ -219,7 +216,7 @@ class App3 {
     ))
   }
 
-  async init() {
+  init() {
     // renderer
     this.renderer = new THREE.WebGLRenderer()
     this.renderer.setClearColor(new THREE.Color(App3.RENDERER_PARAM.clearColor))
