@@ -55,3 +55,12 @@ a:visited {
 .btn:active {
   background-color: rgba(255, 255, 255, 0.9);
 }
+
+.icon {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: #fff;
+  font-size: 36px;
+  cursor: pointer;
+}
