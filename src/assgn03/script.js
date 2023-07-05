@@ -218,9 +218,10 @@ class App3 {
 
   init() {
     // renderer
-    this.renderer = new THREE.WebGLRenderer()
+    this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setClearColor(new THREE.Color(App3.RENDERER_PARAM.clearColor))
     this.renderer.setSize(App3.RENDERER_PARAM.width, App3.RENDERER_PARAM.height)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     const wrapper = document.querySelector('#webgl')
     wrapper.appendChild(this.renderer.domElement)
 
