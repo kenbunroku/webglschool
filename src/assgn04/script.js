@@ -53,7 +53,7 @@ class App3 {
   }
 
   static get MATERIAL_PARAM() {
-    return { color: 0xf006eff }
+    return { color: 0xffffff }
   }
 
   constructor() {
@@ -64,6 +64,17 @@ class App3 {
     this.directionalLight
     this.ambientLight
     this.axesHelper
+
+    // line
+    this.line
+    this.lineGeometry
+    this.lineMaterial
+    this.linePoints = []
+
+    // points
+    this.points
+    this.pointsGeometry
+    this.pointsMaterial
 
     this.render = this.render.bind(this)
 
@@ -122,6 +133,26 @@ class App3 {
       App3.AMBIENT_LIGHT_PARAM.intensity,
     )
     this.scene.add(this.ambientLight)
+
+    // points
+    this.pointsMaterial = new THREE.PointsMaterial(App3.MATERIAL_PARAM)
+
+    this.pointsGeometry = new THREE.BufferGeometry()
+    const count = 3
+    const width = 2.0
+    const vertices = []
+    for (let i = 0; i < count; i++) {
+      const z = i * width
+      vertices.push(0.0, 0.0, z)
+    }
+    const stride = 3
+    const attribute = new THREE.BufferAttribute(
+      new Float32Array(vertices),
+      stride,
+    )
+    this.pointsGeometry.setAttribute('position', attribute)
+    this.points = new THREE.Points(this.pointsGeometry, this.pointsMaterial)
+    this.scene.add(this.points)
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
