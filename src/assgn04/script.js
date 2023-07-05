@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls'
 import * as dat from 'lil-gui'
 
 window.addEventListener(
@@ -18,10 +19,10 @@ class App3 {
       fovy: 45,
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
-      far: 10000.0,
+      far: 20.0,
       x: 10.0,
-      y: 0.0,
-      z: 2500.0,
+      y: 10.0,
+      z: 10.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
@@ -122,12 +123,22 @@ class App3 {
     )
     this.scene.add(this.ambientLight)
 
+    // controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+
     // debug
     const gui = new dat.GUI()
+
+    // axes helper
+    const axesBarLength = 5.0
+    this.axesHelper = new THREE.AxesHelper(axesBarLength)
+    this.scene.add(this.axesHelper)
   }
 
   render() {
     requestAnimationFrame(this.render)
+
+    this.controls.update()
 
     this.renderer.render(this.scene, this.camera)
   }
