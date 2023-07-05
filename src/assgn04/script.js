@@ -92,9 +92,10 @@ class App3 {
 
   init() {
     // renderer
-    this.renderer = new THREE.WebGLRenderer()
+    this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setClearColor(new THREE.Color(App3.RENDERER_PARAM.clearColor))
     this.renderer.setSize(App3.RENDERER_PARAM.width, App3.RENDERER_PARAM.height)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     const wrapper = document.querySelector('#webgl')
     wrapper.appendChild(this.renderer.domElement)
 
@@ -153,6 +154,14 @@ class App3 {
     this.pointsGeometry.setAttribute('position', attribute)
     this.points = new THREE.Points(this.pointsGeometry, this.pointsMaterial)
     this.scene.add(this.points)
+
+    // line
+    this.lineMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
+    this.lineGeometry = new THREE.CylinderGeometry(0.02, 0.02, 6, 32)
+    this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
+    this.scene.add(this.line)
+    this.line.rotation.x = Math.PI / 2
+    this.line.position.z = 3.0
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
