@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
-import * as dat from 'lil-gui'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -78,8 +77,7 @@ class App3 {
     this.pointsMaterial
 
     // planes
-    this.planeGeometry
-    this.planeMaterial
+    this.planeArray = []
 
     this.render = this.render.bind(this)
 
@@ -95,6 +93,28 @@ class App3 {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         this.camera.aspect = window.innerWidth / window.innerHeight
         this.camera.updateProjectionMatrix()
+      },
+      false,
+    )
+
+    // raycaster
+    this.raycaster = new THREE.Raycaster()
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        const x = (event.clientX / window.innerWidth) * 2.0 - 1.0
+        const y = (event.clientY / window.innerHeight) * 2.0 - 1.0
+
+        const v = new THREE.Vector2(x, -y)
+
+        this.raycaster.setFromCamera(v, this.camera)
+        const intersects = this.raycaster.intersectObjects(this.planeArray)
+        if (intersects.length > 0) {
+          // move the first intersected object to the up
+          const intersected = intersects[0]
+          const object = intersected.object
+          object.position.y = 0.3
+        }
       },
       false,
     )
@@ -222,7 +242,7 @@ class App3 {
 
     // line
     this.lineMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
-    this.lineGeometry = new THREE.CylinderGeometry(0.02, 0.02, 2.0 * count, 32)
+    this.lineGeometry = new THREE.CylinderGeometry(0.01, 0.01, 2.0 * count, 32)
     this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
@@ -231,13 +251,13 @@ class App3 {
     this.line.position.z = count
 
     // planes
-    this.planeGeometry = new THREE.PlaneGeometry(0.75, 1.0)
     for (const [index, [key, value]] of Object.entries(
       Object.entries(this.movieList),
     )) {
       const movies = value
       movies.forEach((movie, j) => {
-        const plane = new THREE.Mesh(this.planeGeometry)
+        const geometry = new THREE.PlaneGeometry(0.75, 1.0)
+        const plane = new THREE.Mesh(geometry)
         plane.position.set(j * 0.2 - 1.5, 0.0, width * index)
         plane.rotation.y = -Math.PI / 3
 
@@ -252,6 +272,7 @@ class App3 {
             })
             plane.material = material
             this.scene.add(plane)
+            this.planeArray.push(plane)
           })
           .catch((error) => {
             console.error('Error loading texture:', error)
@@ -259,11 +280,8 @@ class App3 {
       })
     }
 
-    // controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-
-    // debug
-    const gui = new dat.GUI()
+    // // controls
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // axes helper
     const axesBarLength = 5.0
