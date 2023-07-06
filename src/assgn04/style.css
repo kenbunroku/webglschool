@@ -14,6 +14,15 @@ a:visited {
   color: #fff;
 }
 
+.page-title {
+  position: absolute;
+  top: 64px;
+  left: 10px;
+  color: #fff;
+  font-family: serif;
+  font-size: 40px;
+}
+
 .text {
   position: absolute;
   top: 10px;
