@@ -6,9 +6,10 @@ window.addEventListener(
   'DOMContentLoaded',
   () => {
     const app = new App3()
-
-    app.init()
-    app.render()
+    app.load().then(() => {
+      app.init()
+      app.render()
+    })
   },
   false,
 )
@@ -23,7 +24,7 @@ class App3 {
       x: 1.0,
       y: 4.0,
       z: 8.0,
-      lookAt: new THREE.Vector3(10.0, 0.0, 0.0),
+      lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
 
@@ -82,6 +83,11 @@ class App3 {
 
     this.render = this.render.bind(this)
 
+    // API key
+    this.apiKey = '0296d9cfab50bb2bb831354611c78819'
+
+    this.movieList = []
+
     //Resize event
     window.addEventListener(
       'resize',
@@ -92,6 +98,17 @@ class App3 {
       },
       false,
     )
+  }
+
+  async load() {
+    for (let i = 0; i < 3; i++) {
+      const url = `https://api.themoviedb.org/3/search/movie?query=indiana%20jones&include_adult=false&language=en-US&page=${
+        i + 1
+      }&region=US&api_key=${this.apiKey}`
+      const response = await fetch(url)
+      const json = await response.json()
+      this.movieList.push(...json.results)
+    }
   }
 
   init() {
@@ -178,12 +195,12 @@ class App3 {
     for (let i = 0; i < planeCount; i++) {
       const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
       plane.position.set(i * 0.3 - 2.0, 0.0, 0.0)
-      plane.rotation.y = Math.PI / 2 - 0.25
+      plane.rotation.y = -Math.PI / 4
       this.scene.add(plane)
     }
 
-    // controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // // controls
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // debug
     const gui = new dat.GUI()
@@ -196,8 +213,6 @@ class App3 {
 
   render() {
     requestAnimationFrame(this.render)
-
-    // this.controls.update()
 
     this.renderer.render(this.scene, this.camera)
   }
