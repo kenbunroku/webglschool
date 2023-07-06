@@ -190,7 +190,7 @@ class App3 {
     this.pointsMaterial = new THREE.PointsMaterial(App3.MATERIAL_PARAM)
 
     this.pointsGeometry = new THREE.BufferGeometry()
-    const count = 3
+    const count = Object.keys(this.movieList).length
     const width = 2.0
     const vertices = []
     for (let i = 0; i < count; i++) {
@@ -209,17 +209,17 @@ class App3 {
 
     // line
     this.lineMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
-    this.lineGeometry = new THREE.CylinderGeometry(0.02, 0.02, 6, 32)
+    this.lineGeometry = new THREE.CylinderGeometry(0.02, 0.02, 2.0 * count, 32)
     this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
     this.line.rotation.y = -0.3
     this.line.position.x = -3.0
-    this.line.position.z = 3.0
+    this.line.position.z = count
 
     // planes
     this.planeMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
-    this.planeGeometry = new THREE.PlaneGeometry(1.5, 2.0)
+    this.planeGeometry = new THREE.PlaneGeometry(0.75, 1.0)
     // this.plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
     // const texture = new THREE.TextureLoader().load(
     //   `https://image.tmdb.org/t/p/original/${this.movieList['1990s'][0]['poster_path']}`,
@@ -228,15 +228,20 @@ class App3 {
     // this.scene.add(this.plane)
     const planeCount = 10
     const planes = []
-    for (let i = 0; i < planeCount; i++) {
-      const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
-      plane.position.set(i * 0.4 - 2.0, 0.0, 0.0)
-      plane.rotation.y = -Math.PI / 4
-      this.scene.add(plane)
+    for (const [index, [key, value]] of Object.entries(
+      Object.entries(this.movieList),
+    )) {
+      const movies = value
+      movies.map((movie, j) => {
+        const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
+        plane.position.set(j * 0.2 - 2.5, 0.0, width * index)
+        plane.rotation.y = -Math.PI / 4
+        this.scene.add(plane)
+      })
     }
 
-    // // controls
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // debug
     const gui = new dat.GUI()
