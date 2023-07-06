@@ -86,7 +86,7 @@ class App3 {
     // API key
     this.apiKey = '0296d9cfab50bb2bb831354611c78819'
 
-    this.movieList = []
+    this.movieList
 
     //Resize event
     window.addEventListener(
@@ -101,13 +101,43 @@ class App3 {
   }
 
   async load() {
-    for (let i = 0; i < 3; i++) {
-      const url = `https://api.themoviedb.org/3/search/movie?query=indiana%20jones&include_adult=false&language=en-US&page=${
+    this.movieList = {
+      '1960s': [],
+      '1970s': [],
+      '1980s': [],
+      '1990s': [],
+      '2000s': [],
+      '2010s': [],
+      '2020s': [],
+    }
+    for (let i = 0; i < 5; i++) {
+      const url = `https://api.themoviedb.org/3/search/movie?query=spider%20man&include_adult=false&language=en-US&page=${
         i + 1
       }&region=US&api_key=${this.apiKey}`
       const response = await fetch(url)
       const json = await response.json()
-      this.movieList.push(...json.results)
+      const filtered = json.results.filter(
+        (movie) =>
+          movie['original_language'] === 'en' && movie['release_date'] !== '',
+      )
+      filtered.forEach((movie) => {
+        const year = movie['release_date'].slice(0, 4)
+        if (year >= 1960 && year < 1970) {
+          this.movieList['1960s'].push(movie)
+        } else if (year >= 1970 && year < 1980) {
+          this.movieList['1970s'].push(movie)
+        } else if (year >= 1980 && year < 1990) {
+          this.movieList['1980s'].push(movie)
+        } else if (year >= 1990 && year < 2000) {
+          this.movieList['1990s'].push(movie)
+        } else if (year >= 2000 && year < 2010) {
+          this.movieList['2000s'].push(movie)
+        } else if (year >= 2010 && year < 2020) {
+          this.movieList['2010s'].push(movie)
+        } else if (year >= 2020 && year < 2030) {
+          this.movieList['2020s'].push(movie)
+        }
+      })
     }
   }
 
@@ -189,12 +219,18 @@ class App3 {
 
     // planes
     this.planeMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
-    this.planeGeometry = new THREE.PlaneGeometry(1.0, 1.0)
+    this.planeGeometry = new THREE.PlaneGeometry(1.5, 2.0)
+    // this.plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
+    // const texture = new THREE.TextureLoader().load(
+    //   `https://image.tmdb.org/t/p/original/${this.movieList['1990s'][0]['poster_path']}`,
+    // )
+    // this.planeMaterial.map = texture
+    // this.scene.add(this.plane)
     const planeCount = 10
     const planes = []
     for (let i = 0; i < planeCount; i++) {
       const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
-      plane.position.set(i * 0.3 - 2.0, 0.0, 0.0)
+      plane.position.set(i * 0.4 - 2.0, 0.0, 0.0)
       plane.rotation.y = -Math.PI / 4
       this.scene.add(plane)
     }
