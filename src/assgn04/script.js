@@ -21,9 +21,9 @@ class App3 {
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
       far: 20.0,
-      x: 1.0,
-      y: 4.0,
-      z: 8.0,
+      x: -1.0,
+      y: 2.0,
+      z: 7.0,
       lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
     }
   }
@@ -118,7 +118,9 @@ class App3 {
       const json = await response.json()
       const filtered = json.results.filter(
         (movie) =>
-          movie['original_language'] === 'en' && movie['release_date'] !== '',
+          movie['original_language'] === 'en' &&
+          movie['release_date'] !== '' &&
+          movie['poster_path'] !== null,
       )
       filtered.forEach((movie) => {
         const year = movie['release_date'].slice(0, 4)
@@ -139,6 +141,17 @@ class App3 {
         }
       })
     }
+  }
+
+  async loadTexture(url) {
+    return new Promise((resolve, reject) => {
+      new THREE.TextureLoader().load(
+        url,
+        (texture) => resolve(texture), // On load successful
+        undefined, // On load in progress (not needed)
+        (error) => reject(error), // On load fail
+      )
+    })
   }
 
   init() {
@@ -194,7 +207,7 @@ class App3 {
     const width = 2.0
     const vertices = []
     for (let i = 0; i < count; i++) {
-      const x = -3.0
+      const x = -2.0
       const z = i * width
       vertices.push(x, 0.0, z)
     }
@@ -214,29 +227,35 @@ class App3 {
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
     this.line.rotation.y = -0.3
-    this.line.position.x = -3.0
+    this.line.position.x = -2.0
     this.line.position.z = count
 
     // planes
-    this.planeMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
     this.planeGeometry = new THREE.PlaneGeometry(0.75, 1.0)
-    // this.plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
-    // const texture = new THREE.TextureLoader().load(
-    //   `https://image.tmdb.org/t/p/original/${this.movieList['1990s'][0]['poster_path']}`,
-    // )
-    // this.planeMaterial.map = texture
-    // this.scene.add(this.plane)
-    const planeCount = 10
-    const planes = []
     for (const [index, [key, value]] of Object.entries(
       Object.entries(this.movieList),
     )) {
       const movies = value
-      movies.map((movie, j) => {
-        const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
-        plane.position.set(j * 0.2 - 2.5, 0.0, width * index)
-        plane.rotation.y = -Math.PI / 4
-        this.scene.add(plane)
+      movies.forEach((movie, j) => {
+        const plane = new THREE.Mesh(this.planeGeometry)
+        plane.position.set(j * 0.2 - 1.5, 0.0, width * index)
+        plane.rotation.y = -Math.PI / 3
+
+        this.loadTexture(
+          `https://image.tmdb.org/t/p/original/${movie['poster_path']}`,
+        )
+          .then((texture) => {
+            const material = new THREE.MeshBasicMaterial({
+              map: texture,
+              transparent: true,
+              opacity: 1.0,
+            })
+            plane.material = material
+            this.scene.add(plane)
+          })
+          .catch((error) => {
+            console.error('Error loading texture:', error)
+          })
       })
     }
 
