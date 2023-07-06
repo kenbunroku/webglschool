@@ -20,10 +20,10 @@ class App3 {
       aspect: window.innerWidth / window.innerHeight,
       near: 0.1,
       far: 20.0,
-      x: 10.0,
-      y: 10.0,
-      z: 10.0,
-      lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
+      x: 1.0,
+      y: 4.0,
+      z: 8.0,
+      lookAt: new THREE.Vector3(10.0, 0.0, 0.0),
     }
   }
 
@@ -75,6 +75,10 @@ class App3 {
     this.points
     this.pointsGeometry
     this.pointsMaterial
+
+    // planes
+    this.planeGeometry
+    this.planeMaterial
 
     this.render = this.render.bind(this)
 
@@ -143,8 +147,9 @@ class App3 {
     const width = 2.0
     const vertices = []
     for (let i = 0; i < count; i++) {
+      const x = -3.0
       const z = i * width
-      vertices.push(0.0, 0.0, z)
+      vertices.push(x, 0.0, z)
     }
     const stride = 3
     const attribute = new THREE.BufferAttribute(
@@ -161,7 +166,21 @@ class App3 {
     this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
+    this.line.rotation.y = -0.3
+    this.line.position.x = -3.0
     this.line.position.z = 3.0
+
+    // planes
+    this.planeMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
+    this.planeGeometry = new THREE.PlaneGeometry(1.0, 1.0)
+    const planeCount = 10
+    const planes = []
+    for (let i = 0; i < planeCount; i++) {
+      const plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial)
+      plane.position.set(i * 0.3 - 2.0, 0.0, 0.0)
+      plane.rotation.y = Math.PI / 2 - 0.25
+      this.scene.add(plane)
+    }
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -178,7 +197,7 @@ class App3 {
   render() {
     requestAnimationFrame(this.render)
 
-    this.controls.update()
+    // this.controls.update()
 
     this.renderer.render(this.scene, this.camera)
   }
