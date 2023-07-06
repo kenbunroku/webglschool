@@ -114,7 +114,7 @@ class App3 {
   // init
   init() {
     // renderer
-    this.renderer = new THREE.WebGLRenderer({ antialias: true })
+    this.renderer = new THREE.WebGLRenderer()
     this.renderer.setClearColor(new THREE.Color(App3.RENDERER_PARAM.clearColor))
     this.renderer.setSize(App3.RENDERER_PARAM.width, App3.RENDERER_PARAM.height)
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
