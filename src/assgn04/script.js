@@ -103,6 +103,7 @@ class App3 {
     window.addEventListener(
       'pointermove',
       (event) => {
+        event.preventDefault()
         const x = (event.clientX / window.innerWidth) * 2.0 - 1.0
         const y = (event.clientY / window.innerHeight) * 2.0 - 1.0
 
@@ -115,6 +116,10 @@ class App3 {
           const intersected = intersects[0]
           const object = intersected.object
           gsap.to(object.position, { duration: 0.5, y: 0.3 })
+
+          // Desplay the movie title
+          document.querySelector('.movie-title').innerHTML =
+            object.userData['original_title']
 
           // move the other objects to the down
           this.planeArray.forEach((plane) => {
@@ -134,6 +139,7 @@ class App3 {
   }
 
   async load() {
+    // Fetch data and sort them out by release decade
     this.movieList = {
       '1960s': [],
       '1970s': [],
@@ -147,6 +153,7 @@ class App3 {
       const url = `https://api.themoviedb.org/3/search/movie?query=spider%20man&include_adult=false&language=en-US&page=${
         i + 1
       }&region=US&api_key=${this.apiKey}`
+
       const response = await fetch(url)
       const json = await response.json()
       const filtered = json.results.filter(
@@ -155,6 +162,7 @@ class App3 {
           movie['release_date'] !== '' &&
           movie['poster_path'] !== null,
       )
+
       filtered.forEach((movie) => {
         const year = movie['release_date'].slice(0, 4)
         if (year >= 1960 && year < 1970) {
@@ -273,6 +281,9 @@ class App3 {
         const plane = new THREE.Mesh(geometry)
         plane.position.set(j * 0.2 - 1.5, 0.0, width * index)
         plane.rotation.y = -Math.PI / 3
+
+        // store movie data attached to plane
+        plane.userData = movie
 
         this.loadTexture(
           `https://image.tmdb.org/t/p/original/${movie['poster_path']}`,
