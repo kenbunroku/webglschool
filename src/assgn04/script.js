@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
+import gsap from 'gsap'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -113,18 +114,18 @@ class App3 {
           // move the first intersected object to the up
           const intersected = intersects[0]
           const object = intersected.object
-          object.position.y = 0.3
+          gsap.to(object.position, { duration: 0.5, y: 0.3 })
 
           // move the other objects to the down
           this.planeArray.forEach((plane) => {
             if (plane !== object) {
-              plane.position.y = 0.0
+              gsap.to(plane.position, { duration: 0.5, y: 0.0 })
             }
           })
         } else {
           // move all objects to the down
           this.planeArray.forEach((plane) => {
-            plane.position.y = 0.0
+            gsap.to(plane.position, { duration: 0.5, y: 0.0 })
           })
         }
       },
