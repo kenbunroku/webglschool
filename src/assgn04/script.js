@@ -57,6 +57,8 @@ class App3 {
     return { color: 0xffffff }
   }
 
+  static get FOG_PARAM() {}
+
   constructor() {
     this.renderer
     this.scene
@@ -80,6 +82,8 @@ class App3 {
     // planes
     this.planeArray = []
 
+    this.isCliked = false
+
     this.render = this.render.bind(this)
 
     // API key
@@ -100,6 +104,7 @@ class App3 {
 
     // raycaster
     this.raycaster = new THREE.Raycaster()
+
     window.addEventListener(
       'pointermove',
       (event) => {
@@ -111,7 +116,7 @@ class App3 {
 
         this.raycaster.setFromCamera(v, this.camera)
         const intersects = this.raycaster.intersectObjects(this.planeArray)
-        if (intersects.length > 0) {
+        if (intersects.length > 0 && !this.isCliked) {
           // move the first intersected object to the up
           const intersected = intersects[0]
           const object = intersected.object
@@ -127,11 +132,54 @@ class App3 {
               gsap.to(plane.position, { duration: 0.5, y: 0.0 })
             }
           })
-        } else {
+        } else if (!this.isCliked) {
           // move all objects to the down
           this.planeArray.forEach((plane) => {
             gsap.to(plane.position, { duration: 0.5, y: 0.0 })
           })
+        }
+      },
+      false,
+    )
+
+    window.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault()
+
+        // this.isCliked = true
+
+        const x = (event.clientX / window.innerWidth) * 2.0 - 1.0
+        const y = (event.clientY / window.innerHeight) * 2.0 - 1.0
+        const v = new THREE.Vector2(x, -y)
+        this.raycaster.setFromCamera(v, this.camera)
+
+        const intersects = this.raycaster.intersectObjects(this.planeArray)
+        if (intersects.length > 0 && !this.isCliked) {
+          const intersected = intersects[0]
+          let object = intersected.object
+
+          let tl = gsap.timeline({ onComplete: () => (this.isCliked = true) })
+          const duration = 0.5
+          const scale = 2.0
+
+          tl.to(
+            object.position,
+            {
+              duration: duration,
+              x: 1.25,
+              y: 1.25,
+              z: 2.5,
+            },
+            0,
+          )
+          tl.to(
+            object.rotation,
+            { duration: duration, x: Math.PI * 2 - 0.1, y: -0.4 },
+            0,
+          )
+          tl.to(object.scale, { duration: duration, x: scale, y: scale }, 0)
+          tl.to('.movie-title', { duration: duration, y: 125 }, 0)
         }
       },
       false,
@@ -303,9 +351,12 @@ class App3 {
           })
       })
     }
+    // // set geomeetry of selected movie
+    // this.selectedMovieGeometry = new THREE.PlaneGeometry(0.75, 1.0)
+    // this.selectedMovieGeometry.position.set(1.0, 1.0, 0.0)
 
-    // // controls
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // axes helper
     const axesBarLength = 5.0
