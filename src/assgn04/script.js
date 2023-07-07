@@ -59,6 +59,10 @@ class App3 {
     return { color: 0xffffff }
   }
 
+  static get POINT_MATERIAL_PARAM() {
+    return { color: 0xffffff, size: 0.2, sizeAttenuation: true }
+  }
+
   static get TEXT_MATERIAL_PARAM() {
     return { color: 0xffffff }
   }
@@ -354,7 +358,7 @@ class App3 {
     this.scene.add(this.ambientLight)
 
     // points
-    this.pointsMaterial = new THREE.PointsMaterial(App3.MATERIAL_PARAM)
+    this.pointsMaterial = new THREE.PointsMaterial(App3.POINT_MATERIAL_PARAM)
 
     this.pointsGeometry = new THREE.BufferGeometry()
     const count = Object.keys(this.movieList).length
