@@ -57,8 +57,6 @@ class App3 {
     return { color: 0xffffff }
   }
 
-  static get FOG_PARAM() {}
-
   constructor() {
     this.renderer
     this.scene
@@ -83,6 +81,8 @@ class App3 {
     this.planeArray = []
 
     this.isCliked = false
+    this.object
+    this.objectCopy
 
     this.render = this.render.bind(this)
 
@@ -105,6 +105,7 @@ class App3 {
     // raycaster
     this.raycaster = new THREE.Raycaster()
 
+    // pointermove event to move the object up
     window.addEventListener(
       'pointermove',
       (event) => {
@@ -142,12 +143,11 @@ class App3 {
       false,
     )
 
+    // click event to move the object to the right center and display the movie overview
     window.addEventListener(
       'click',
       (event) => {
         event.preventDefault()
-
-        // this.isCliked = true
 
         const x = (event.clientX / window.innerWidth) * 2.0 - 1.0
         const y = (event.clientY / window.innerHeight) * 2.0 - 1.0
@@ -155,31 +155,90 @@ class App3 {
         this.raycaster.setFromCamera(v, this.camera)
 
         const intersects = this.raycaster.intersectObjects(this.planeArray)
-        if (intersects.length > 0 && !this.isCliked) {
-          const intersected = intersects[0]
-          let object = intersected.object
 
-          let tl = gsap.timeline({ onComplete: () => (this.isCliked = true) })
+        if (intersects.length > 0 && !this.isCliked) {
+          this.isCliked = true
+          const intersected = intersects[0]
+          this.object = intersected.object
+          this.objectCopy = this.object.clone()
+
+          // Desplay the movie overview
+          document.querySelector('.movie-overview').innerHTML =
+            this.object.userData['overview']
+
+          let tl = gsap.timeline()
           const duration = 0.5
           const scale = 2.0
 
           tl.to(
-            object.position,
+            this.object.position,
             {
               duration: duration,
-              x: 1.25,
+              x: 2.0,
               y: 1.25,
               z: 2.5,
             },
             0,
           )
           tl.to(
-            object.rotation,
+            this.object.rotation,
             { duration: duration, x: Math.PI * 2 - 0.1, y: -0.4 },
             0,
           )
-          tl.to(object.scale, { duration: duration, x: scale, y: scale }, 0)
-          tl.to('.movie-title', { duration: duration, y: 125 }, 0)
+          tl.to(
+            this.object.scale,
+            { duration: duration, x: scale, y: scale },
+            0,
+          )
+          tl.to('.movie-info-container', { duration: duration, y: 110 }, 0)
+          tl.to('.movie-overview-container', { duration: duration, opacity: 1 })
+        } else if (this.isCliked) {
+          // move back to the original position
+          let tl = gsap.timeline(
+            { onComplete: () => (this.isCliked = false) },
+            1,
+          )
+
+          const duration = 0.5
+          const scale = 1.0
+
+          tl.to(
+            this.object.position,
+            {
+              duration: duration,
+              x: this.objectCopy.position.x,
+              y: 0.0,
+              z: this.objectCopy.position.z,
+            },
+            0,
+          )
+          tl.to(
+            this.object.rotation,
+            {
+              duration: duration,
+              x: -Math.PI * 2,
+              y: this.objectCopy.rotation.y,
+            },
+            0,
+          )
+          tl.to(
+            this.object.scale,
+            { duration: duration, x: scale, y: scale },
+            0,
+          )
+          tl.to('.movie-info-container', { duration: duration, y: -125 }, 0)
+          tl.to(
+            '.movie-overview-container',
+            {
+              duration: duration,
+              opacity: 0,
+              onComplete: () => {
+                // Clean up the movie overview
+                document.querySelector('.movie-overview').innerHTML = ''
+              },
+            },
+            0,
+          )
         }
       },
       false,
@@ -254,6 +313,11 @@ class App3 {
 
     // scene
     this.scene = new THREE.Scene()
+    // this.scene.fog = new THREE.Fog(
+    //   App3.FOG_PARAM.fogColor,
+    //   App3.FOG_PARAM.fogNear,
+    //   App3.FOG_PARAM.fogFar,
+    // )
 
     // camera
     this.camera = new THREE.PerspectiveCamera(
