@@ -127,6 +127,7 @@ class App3 {
 
         this.raycaster.setFromCamera(v, this.camera)
         const intersects = this.raycaster.intersectObjects(this.planeArray)
+
         if (intersects.length > 0 && !this.isCliked) {
           // move the first intersected object to the up
           const intersected = intersects[0]
@@ -135,7 +136,10 @@ class App3 {
 
           // Desplay the movie title
           document.querySelector('.movie-title').innerHTML =
-            object.userData['original_title']
+            object.userData['original_title'] +
+            ' (' +
+            object.userData['release_date'].slice(0, 4) +
+            ')'
 
           // move the other objects to the down
           this.planeArray.forEach((plane) => {
@@ -148,6 +152,11 @@ class App3 {
           this.planeArray.forEach((plane) => {
             gsap.to(plane.position, { duration: 0.5, y: 0.0 })
           })
+        }
+
+        if (intersects.length == 0 && !this.isCliked) {
+          // clean the movie title
+          document.querySelector('.movie-title').innerHTML = ''
         }
       },
       false,
@@ -184,7 +193,7 @@ class App3 {
             this.object.position,
             {
               duration: duration,
-              x: 2.0,
+              x: 1.5,
               y: 1.25,
               z: 2.5,
             },
