@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
+import { FontLoader } from 'three/addons/loaders/FontLoader.js'
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'
 import gsap from 'gsap'
 
 window.addEventListener(
@@ -54,6 +56,10 @@ class App3 {
   }
 
   static get MATERIAL_PARAM() {
+    return { color: 0xffffff }
+  }
+
+  static get TEXT_MATERIAL_PARAM() {
     return { color: 0xffffff }
   }
 
@@ -313,11 +319,6 @@ class App3 {
 
     // scene
     this.scene = new THREE.Scene()
-    // this.scene.fog = new THREE.Fog(
-    //   App3.FOG_PARAM.fogColor,
-    //   App3.FOG_PARAM.fogNear,
-    //   App3.FOG_PARAM.fogFar,
-    // )
 
     // camera
     this.camera = new THREE.PerspectiveCamera(
@@ -379,7 +380,6 @@ class App3 {
     this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
-    this.line.rotation.y = -0.3
     this.line.position.x = -2.0
     this.line.position.z = count
 
@@ -387,6 +387,26 @@ class App3 {
     for (const [index, [key, value]] of Object.entries(
       Object.entries(this.movieList),
     )) {
+      // font
+      const loader = new FontLoader()
+      loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
+        const textMaterial = new THREE.MeshBasicMaterial(
+          App3.TEXT_MATERIAL_PARAM,
+        )
+
+        const message = key
+        const shapes = font.generateShapes(message, 0.2)
+        const geometry = new THREE.ShapeGeometry(shapes)
+        const text = new THREE.Mesh(geometry, textMaterial)
+        text.position.set(-2.0, 0.0, width * index)
+        text.rotation.y = -0.1
+        geometry.computeBoundingBox()
+        const xMid =
+          -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) - 0.2
+        geometry.translate(xMid, 0, 0)
+        this.scene.add(text)
+      })
+
       const movies = value
       movies.forEach((movie, j) => {
         const geometry = new THREE.PlaneGeometry(0.75, 1.0)
