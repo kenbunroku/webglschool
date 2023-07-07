@@ -97,10 +97,11 @@ a:visited {
 }
 
 .movie-info-container {
-  margin: 5%;
+  margin-right: 10%;
   position: absolute;
-  top: 300px;
+  top: 350px;
   right: 0;
+  width: 450px;
 }
 
 .movie-title {
@@ -108,12 +109,11 @@ a:visited {
   text-align: center;
   color: #fff;
   font-family: sans-serif;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 200;
 }
 
 .movie-overview-container {
-  width: 400px;
   background-color: rgba(255, 255, 255, 0.6);
   padding: 16px;
   color: #000;
