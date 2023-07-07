@@ -114,6 +114,18 @@ class App3 {
           const intersected = intersects[0]
           const object = intersected.object
           object.position.y = 0.3
+
+          // move the other objects to the down
+          this.planeArray.forEach((plane) => {
+            if (plane !== object) {
+              plane.position.y = 0.0
+            }
+          })
+        } else {
+          // move all objects to the down
+          this.planeArray.forEach((plane) => {
+            plane.position.y = 0.0
+          })
         }
       },
       false,
