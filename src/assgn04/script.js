@@ -527,24 +527,27 @@ class App3 {
 
       // font
       const loader = new FontLoader()
-      loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-        const textMaterial = new THREE.MeshBasicMaterial(
-          App3.TEXT_MATERIAL_PARAM,
-        )
+      loader.load(
+        '/webglschool/fonts/helvetiker_regular.typeface.json',
+        (font) => {
+          const textMaterial = new THREE.MeshBasicMaterial(
+            App3.TEXT_MATERIAL_PARAM,
+          )
 
-        const message = key
-        const shapes = font.generateShapes(message, 0.2)
-        const geometry = new THREE.ShapeGeometry(shapes)
-        const text = new THREE.Mesh(geometry, textMaterial)
-        text.position.set(-2.5, 0.0, width * index)
-        text.rotation.y = -0.1
-        geometry.computeBoundingBox()
-        const xMid =
-          -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) - 0.2
-        geometry.translate(xMid, 0, 0)
-        this.scene.add(text)
-        this.timeFrame.add(text)
-      })
+          const message = key
+          const shapes = font.generateShapes(message, 0.2)
+          const geometry = new THREE.ShapeGeometry(shapes)
+          const text = new THREE.Mesh(geometry, textMaterial)
+          text.position.set(-2.5, 0.0, width * index)
+          text.rotation.y = -0.1
+          geometry.computeBoundingBox()
+          const xMid =
+            -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) - 0.2
+          geometry.translate(xMid, 0, 0)
+          this.scene.add(text)
+          this.timeFrame.add(text)
+        },
+      )
     }
     this.scene.add(this.timeFrame)
     this.timeFrame.position.z = 2.01
