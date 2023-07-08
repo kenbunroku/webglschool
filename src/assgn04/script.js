@@ -21,7 +21,7 @@ class App3 {
     return {
       fovy: 45,
       aspect: window.innerWidth / window.innerHeight,
-      near: 2,
+      near: 2.0,
       far: 8.0,
       x: -1.0,
       y: 2.0,
@@ -68,7 +68,7 @@ class App3 {
   }
 
   static get FOG_PARAM() {
-    return { fogColor: 0x232120, fogNear: 4.0, fogFar: 9.0 }
+    return { fogColor: 0x232120, fogNear: 3.0, fogFar: 10.0 }
   }
 
   constructor() {
