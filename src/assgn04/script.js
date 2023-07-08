@@ -75,6 +75,11 @@ class App3 {
     this.directionalLight
     this.ambientLight
     this.axesHelper
+    this.scrollUpperLimit = 1000
+    this.scrollBottomLimit = 200
+    this.lastScroll = this.scrollBotttomLimit
+    this.speed
+    this.timeFrame
 
     // line
     this.line
@@ -262,6 +267,18 @@ class App3 {
       },
       false,
     )
+
+    // wheel event
+    window.addEventListener('wheel', (event) => {
+      event.preventDefault()
+
+      if (!this.isCliked) {
+        // move the position z of timeFrame based on the wheel event
+        const speed = event.deltaY * 0.001
+        this.timeFrame.position.z += speed
+        console.log(this.timeFrame.position.z)
+      }
+    })
   }
 
   async load() {
@@ -366,6 +383,8 @@ class App3 {
     )
     this.scene.add(this.ambientLight)
 
+    this.timeFrame = new THREE.Group()
+
     // points
     this.pointsMaterial = new THREE.PointsMaterial(App3.POINT_MATERIAL_PARAM)
 
@@ -386,6 +405,7 @@ class App3 {
     this.pointsGeometry.setAttribute('position', attribute)
     this.points = new THREE.Points(this.pointsGeometry, this.pointsMaterial)
     this.scene.add(this.points)
+    this.timeFrame.add(this.points)
 
     // line
     this.lineMaterial = new THREE.MeshBasicMaterial(App3.MATERIAL_PARAM)
@@ -395,31 +415,12 @@ class App3 {
     this.line.rotation.x = Math.PI / 2
     this.line.position.x = -2.0
     this.line.position.z = count
+    this.timeFrame.add(this.line)
 
     // planes
     for (const [index, [key, value]] of Object.entries(
       Object.entries(this.movieList),
     )) {
-      // font
-      const loader = new FontLoader()
-      loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-        const textMaterial = new THREE.MeshBasicMaterial(
-          App3.TEXT_MATERIAL_PARAM,
-        )
-
-        const message = key
-        const shapes = font.generateShapes(message, 0.2)
-        const geometry = new THREE.ShapeGeometry(shapes)
-        const text = new THREE.Mesh(geometry, textMaterial)
-        text.position.set(-2.0, 0.0, width * index)
-        text.rotation.y = -0.1
-        geometry.computeBoundingBox()
-        const xMid =
-          -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) - 0.2
-        geometry.translate(xMid, 0, 0)
-        this.scene.add(text)
-      })
-
       const movies = value
       movies.forEach((movie, j) => {
         const geometry = new THREE.PlaneGeometry(0.75, 1.0)
@@ -441,19 +442,42 @@ class App3 {
             })
             plane.material = material
             this.scene.add(plane)
+            this.timeFrame.add(plane)
             this.planeArray.push(plane)
           })
           .catch((error) => {
             console.error('Error loading texture:', error)
           })
       })
+
+      // font
+      const loader = new FontLoader()
+      loader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
+        const textMaterial = new THREE.MeshBasicMaterial(
+          App3.TEXT_MATERIAL_PARAM,
+        )
+
+        const message = key
+        const shapes = font.generateShapes(message, 0.2)
+        const geometry = new THREE.ShapeGeometry(shapes)
+        const text = new THREE.Mesh(geometry, textMaterial)
+        text.position.set(-2.0, 0.0, width * index)
+        text.rotation.y = -0.1
+        geometry.computeBoundingBox()
+        const xMid =
+          -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) - 0.2
+        geometry.translate(xMid, 0, 0)
+        this.scene.add(text)
+        this.timeFrame.add(text)
+      })
     }
+    this.scene.add(this.timeFrame)
     // // set geomeetry of selected movie
     // this.selectedMovieGeometry = new THREE.PlaneGeometry(0.75, 1.0)
     // this.selectedMovieGeometry.position.set(1.0, 1.0, 0.0)
 
-    // controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // // controls
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     // axes helper
     const axesBarLength = 5.0
