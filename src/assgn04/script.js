@@ -190,8 +190,12 @@ class App3 {
           this.objectCopy = this.object.clone()
 
           // Desplay the movie overview
-          document.querySelector('.movie-overview').innerHTML =
-            this.object.userData['overview']
+          if (!this.object.userData['overview'] == '') {
+            document.querySelector('.movie-overview').innerHTML =
+              this.object.userData['overview']
+          } else {
+            document.querySelector('.movie-overview').innerHTML = 'No overview'
+          }
 
           let tl = gsap.timeline()
           const duration = 0.5
@@ -498,14 +502,14 @@ class App3 {
     this.scene.add(this.timeFrame)
     this.timeFrame.position.z = 2.01
 
-    // controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.enableZoom = false
+    // // controls
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // this.controls.enableZoom = false
 
-    // axes helper
-    const axesBarLength = 5.0
-    this.axesHelper = new THREE.AxesHelper(axesBarLength)
-    this.scene.add(this.axesHelper)
+    // // axes helper
+    // const axesBarLength = 5.0
+    // this.axesHelper = new THREE.AxesHelper(axesBarLength)
+    // this.scene.add(this.axesHelper)
   }
 
   render() {
