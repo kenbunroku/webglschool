@@ -140,14 +140,17 @@ class App3 {
           // move the first intersected object to the up
           const intersected = intersects[0]
           const object = intersected.object
-          gsap.to(object.position, { duration: 0.5, y: 0.3 })
 
-          // Desplay the movie title
-          document.querySelector('.movie-title').innerHTML =
-            object.userData['original_title'] +
-            ' (' +
-            object.userData['release_date'].slice(0, 4) +
-            ')'
+          const posterPosition = object.position.z + this.timeFrame.position.z
+          if (posterPosition > 2.0 && posterPosition < 3.75) {
+            gsap.to(object.position, { duration: 0.5, y: 0.3 })
+            // Desplay the movie title
+            document.querySelector('.movie-title').innerHTML =
+              object.userData['original_title'] +
+              ' (' +
+              object.userData['release_date'].slice(0, 4) +
+              ')'
+          }
 
           // move the other objects to the down
           this.planeArray.forEach((plane) => {
@@ -184,46 +187,54 @@ class App3 {
         const intersects = this.raycaster.intersectObjects(this.planeArray)
 
         if (intersects.length > 0 && !this.isCliked) {
-          this.isCliked = true
           const intersected = intersects[0]
           this.object = intersected.object
           this.objectCopy = this.object.clone()
 
-          // Desplay the movie overview
-          if (!this.object.userData['overview'] == '') {
-            document.querySelector('.movie-overview').innerHTML =
-              this.object.userData['overview']
-          } else {
-            document.querySelector('.movie-overview').innerHTML = 'No overview'
-          }
-
-          let tl = gsap.timeline()
-          const duration = 0.5
-          const scale = 2.0
-
-          tl.to(
-            this.object.position,
-            {
+          // only execute when the object is in the front
+          const posterPosition =
+            this.object.position.z + this.timeFrame.position.z
+          if (posterPosition > 2.0 && posterPosition < 3.75) {
+            // Desplay the movie overview
+            if (!this.object.userData['overview'] == '') {
+              document.querySelector('.movie-overview').innerHTML =
+                this.object.userData['overview']
+            } else {
+              document.querySelector('.movie-overview').innerHTML =
+                'No overview'
+            }
+            tl.to('.movie-info-container', { duration: duration, y: 110 }, 0)
+            tl.to('.movie-overview-container', {
               duration: duration,
-              x: 1.5,
-              y: 1.25,
-              z: 2.5 - this.timeFrame.position.z,
-            },
-            0,
-          )
+              opacity: 1,
+            })
 
-          tl.to(
-            this.object.rotation,
-            { duration: duration, x: Math.PI * 2 - 0.1, y: -0.4 },
-            0,
-          )
-          tl.to(
-            this.object.scale,
-            { duration: duration, x: scale, y: scale },
-            0,
-          )
-          tl.to('.movie-info-container', { duration: duration, y: 110 }, 0)
-          tl.to('.movie-overview-container', { duration: duration, opacity: 1 })
+            // Move the moview poster to the right center
+            let tl = gsap.timeline({ onStart: () => (this.isCliked = true) })
+            const duration = 0.5
+            const scale = 2.0
+
+            tl.to(
+              this.object.position,
+              {
+                duration: duration,
+                x: 1.5,
+                y: 1.25,
+                z: 2.5 - this.timeFrame.position.z,
+              },
+              0,
+            )
+            tl.to(
+              this.object.rotation,
+              { duration: duration, x: Math.PI * 2 - 0.1, y: -0.4 },
+              0,
+            )
+            tl.to(
+              this.object.scale,
+              { duration: duration, x: scale, y: scale },
+              0,
+            )
+          }
         } else if (this.isCliked) {
           // move back to the original position
           let tl = gsap.timeline({ onComplete: () => (this.isCliked = false) })
