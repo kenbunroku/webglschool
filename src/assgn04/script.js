@@ -67,6 +67,10 @@ class App3 {
     return { color: 0xffffff }
   }
 
+  static get FOG_PARAM() {
+    return { fogColor: 0x232120, fogNear: 4.0, fogFar: 9.0 }
+  }
+
   constructor() {
     this.renderer
     this.scene
@@ -367,6 +371,11 @@ class App3 {
 
     // scene
     this.scene = new THREE.Scene()
+    this.scene.fog = new THREE.Fog(
+      App3.FOG_PARAM.fogColor,
+      App3.FOG_PARAM.fogNear,
+      App3.FOG_PARAM.fogFar,
+    )
 
     // camera
     this.camera = new THREE.PerspectiveCamera(
