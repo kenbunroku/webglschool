@@ -497,6 +497,7 @@ class App3 {
       })
     }
     this.scene.add(this.timeFrame)
+    this.timeFrame.position.z = 2.01
 
     // controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
