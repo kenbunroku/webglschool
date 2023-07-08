@@ -138,8 +138,9 @@ class App3 {
           const intersected = intersects[0]
           const object = intersected.object
 
+          // set range of position for the object to move up
           const posterPosition = object.position.z + this.timeFrame.position.z
-          if (posterPosition > 2.0 && posterPosition < 3.75) {
+          if (posterPosition > 1.5 && posterPosition < 3.75) {
             gsap.to(object.position, { duration: 0.5, y: 0.3 })
             // Desplay the movie title
             document.querySelector('.movie-title').innerHTML =
@@ -188,10 +189,10 @@ class App3 {
           this.object = intersected.object
           this.objectCopy = this.object.clone()
 
-          // only execute when the object is in the front
+          // set range of position for the object to be clicked
           const posterPosition =
             this.object.position.z + this.timeFrame.position.z
-          if (posterPosition > 2.0 && posterPosition < 3.75) {
+          if (posterPosition > 1.5 && posterPosition < 3.75) {
             // Desplay the movie overview
             if (!this.object.userData['overview'] == '') {
               document.querySelector('.movie-overview').innerHTML =
