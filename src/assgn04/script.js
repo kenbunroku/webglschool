@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
 import { FontLoader } from 'three/addons/loaders/FontLoader.js'
-import * as d3 from 'd3'
 import gsap from 'gsap'
 
 window.addEventListener(
