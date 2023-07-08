@@ -21,8 +21,8 @@ class App3 {
     return {
       fovy: 45,
       aspect: window.innerWidth / window.innerHeight,
-      near: 0.1,
-      far: 20.0,
+      near: 2,
+      far: 8.0,
       x: -1.0,
       y: 2.0,
       z: 7.0,
@@ -32,7 +32,7 @@ class App3 {
 
   static get RENDERER_PARAM() {
     return {
-      clearColor: 0x000000,
+      clearColor: 0x232120,
       width: window.innerWidth,
       height: window.innerHeight,
     }
@@ -41,10 +41,10 @@ class App3 {
   static get DIRECTIONAL_LIGHT_PARAM() {
     return {
       color: 0xffffff,
-      intensity: 1.0,
-      x: 1.0,
-      y: 1.0,
-      z: 1.0,
+      intensity: 20.0,
+      x: 1.5,
+      y: 2.0,
+      z: 2.5,
     }
   }
 
@@ -200,10 +200,11 @@ class App3 {
               duration: duration,
               x: 1.5,
               y: 1.25,
-              z: 2.5,
+              z: 2.5 - this.timeFrame.position.z,
             },
             0,
           )
+
           tl.to(
             this.object.rotation,
             { duration: duration, x: Math.PI * 2 - 0.1, y: -0.4 },
@@ -218,10 +219,7 @@ class App3 {
           tl.to('.movie-overview-container', { duration: duration, opacity: 1 })
         } else if (this.isCliked) {
           // move back to the original position
-          let tl = gsap.timeline(
-            { onComplete: () => (this.isCliked = false) },
-            1,
-          )
+          let tl = gsap.timeline({ onComplete: () => (this.isCliked = false) })
 
           const duration = 0.5
           const scale = 1.0
@@ -275,8 +273,7 @@ class App3 {
       if (!this.isCliked) {
         // move the position z of timeFrame based on the wheel event
         const speed = event.deltaY * 0.001
-        this.timeFrame.position.z += speed
-        console.log(this.timeFrame.position.z)
+        this.timeFrame.position.z -= speed
       }
     })
   }
@@ -393,7 +390,7 @@ class App3 {
     const width = 2.0
     const vertices = []
     for (let i = 0; i < count; i++) {
-      const x = -2.0
+      const x = -2.5
       const z = i * width
       vertices.push(x, 0.0, z)
     }
@@ -413,19 +410,19 @@ class App3 {
     this.line = new THREE.Mesh(this.lineGeometry, this.lineMaterial)
     this.scene.add(this.line)
     this.line.rotation.x = Math.PI / 2
-    this.line.position.x = -2.0
+    this.line.position.x = -2.5
     this.line.position.z = count
     this.timeFrame.add(this.line)
 
     // planes
+    const geometry = new THREE.PlaneGeometry(0.75, 1.0)
     for (const [index, [key, value]] of Object.entries(
       Object.entries(this.movieList),
     )) {
       const movies = value
       movies.forEach((movie, j) => {
-        const geometry = new THREE.PlaneGeometry(0.75, 1.0)
         const plane = new THREE.Mesh(geometry)
-        plane.position.set(j * 0.2 - 1.5, 0.0, width * index)
+        plane.position.set(j * 0.1 - 2.0, 0.0, width * index)
         plane.rotation.y = -Math.PI / 3
 
         // store movie data attached to plane
@@ -437,8 +434,7 @@ class App3 {
           .then((texture) => {
             const material = new THREE.MeshBasicMaterial({
               map: texture,
-              transparent: true,
-              opacity: 1.0,
+              metalness: 1.0,
             })
             plane.material = material
             this.scene.add(plane)
@@ -461,7 +457,7 @@ class App3 {
         const shapes = font.generateShapes(message, 0.2)
         const geometry = new THREE.ShapeGeometry(shapes)
         const text = new THREE.Mesh(geometry, textMaterial)
-        text.position.set(-2.0, 0.0, width * index)
+        text.position.set(-2.5, 0.0, width * index)
         text.rotation.y = -0.1
         geometry.computeBoundingBox()
         const xMid =
@@ -472,12 +468,10 @@ class App3 {
       })
     }
     this.scene.add(this.timeFrame)
-    // // set geomeetry of selected movie
-    // this.selectedMovieGeometry = new THREE.PlaneGeometry(0.75, 1.0)
-    // this.selectedMovieGeometry.position.set(1.0, 1.0, 0.0)
 
-    // // controls
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.controls.enableZoom = false
 
     // axes helper
     const axesBarLength = 5.0
