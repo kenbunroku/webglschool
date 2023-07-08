@@ -266,13 +266,27 @@ class App3 {
       false,
     )
 
-    // wheel event
+    // wheel event to move the position z of timeFrame based on the wheel event
     window.addEventListener('wheel', (event) => {
       event.preventDefault()
-
-      if (!this.isCliked) {
-        // move the position z of timeFrame based on the wheel event
-        const speed = event.deltaY * 0.001
+      const speed = event.deltaY * 0.001
+      if (
+        !this.isCliked &&
+        this.timeFrame.position.z > -9.0 &&
+        this.timeFrame.position.z < 2.0
+      ) {
+        this.timeFrame.position.z -= speed
+      } else if (
+        !this.isCliked &&
+        this.timeFrame.position.z < -9.0 &&
+        event.deltaY < 0
+      ) {
+        this.timeFrame.position.z -= speed
+      } else if (
+        !this.isCliked &&
+        this.timeFrame.position.z > 2.0 &&
+        event.deltaY > 0
+      ) {
         this.timeFrame.position.z -= speed
       }
     })
