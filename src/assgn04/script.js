@@ -99,11 +99,6 @@ class App3 {
     this.object
     this.objectCopy
 
-    // overlay
-    this.overlay
-    this.overlayGeometry
-    this.overlayMaterial
-
     this.render = this.render.bind(this)
 
     // API key
@@ -365,14 +360,43 @@ class App3 {
   }
 
   async loadTexture(url) {
+    // overlay
+    const topOverlayElement = document.querySelector('.top-overlay')
+    const bottomOverlayElement = document.querySelector('.bottom-overlay')
+
+    // loaders
+    const loadingBarElement = document.querySelector('.loading-bar')
     const loadingManager = new THREE.LoadingManager(
       // loaded
       () => {
-        console.log('loaded')
+        // Wait a little
+        window.setTimeout(() => {
+          // Animate overlays
+          gsap.to(topOverlayElement, {
+            ease: 'power1.easeOut',
+            duration: 1,
+            y: '-50vh',
+            delay: 1,
+          })
+          gsap.to(bottomOverlayElement, {
+            ease: 'power1.easeOut',
+            duration: 1,
+            y: '50vh',
+            delay: 1,
+          })
+
+          // Update loadingBarElement
+          loadingBarElement.classList.add('ended')
+          loadingBarElement.style.transform = ''
+        }, 500)
       },
 
       // in progress
-      (itemUrl, itemsLoaded, itemsTotal) => {},
+      (itemUrl, itemsLoaded, itemsTotal) => {
+        // Calculate the progress and update the loadingBarElement
+        const progressRatio = itemsLoaded / itemsTotal
+        loadingBarElement.style.transform = `scaleX(${progressRatio})`
+      },
     )
 
     return new Promise((resolve, reject) => {
