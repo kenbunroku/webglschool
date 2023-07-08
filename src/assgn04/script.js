@@ -67,7 +67,7 @@ class App3 {
   }
 
   static get FOG_PARAM() {
-    return { fogColor: 0x232120, fogNear: 3.0, fogFar: 10.0 }
+    return { fogColor: 0x232120, fogNear: 3.0, fogFar: 8.5 }
   }
 
   constructor() {
@@ -78,10 +78,6 @@ class App3 {
     this.directionalLight
     this.ambientLight
     this.axesHelper
-    this.scrollUpperLimit = 1000
-    this.scrollBottomLimit = 200
-    this.lastScroll = this.scrollBotttomLimit
-    this.speed
     this.timeFrame
 
     // line
@@ -98,9 +94,15 @@ class App3 {
     // planes
     this.planeArray = []
 
+    // event
     this.isCliked = false
     this.object
     this.objectCopy
+
+    // overlay
+    this.overlay
+    this.overlayGeometry
+    this.overlayMaterial
 
     this.render = this.render.bind(this)
 
@@ -203,11 +205,6 @@ class App3 {
               document.querySelector('.movie-overview').innerHTML =
                 'No overview'
             }
-            tl.to('.movie-info-container', { duration: duration, y: 110 }, 0)
-            tl.to('.movie-overview-container', {
-              duration: duration,
-              opacity: 1,
-            })
 
             // Move the moview poster to the right center
             let tl = gsap.timeline({ onStart: () => (this.isCliked = true) })
@@ -234,6 +231,11 @@ class App3 {
               { duration: duration, x: scale, y: scale },
               0,
             )
+            tl.to('.movie-info-container', { duration: duration, y: 110 }, 0)
+            tl.to('.movie-overview-container', {
+              duration: duration,
+              opacity: 1,
+            })
           }
         } else if (this.isCliked) {
           // move back to the original position
@@ -286,7 +288,6 @@ class App3 {
 
     // wheel event to move the position z of timeFrame based on the wheel event
     window.addEventListener('wheel', (event) => {
-      event.preventDefault()
       const speed = event.deltaY * 0.001
       if (
         !this.isCliked &&
@@ -364,8 +365,18 @@ class App3 {
   }
 
   async loadTexture(url) {
+    const loadingManager = new THREE.LoadingManager(
+      // loaded
+      () => {
+        console.log('loaded')
+      },
+
+      // in progress
+      (itemUrl, itemsLoaded, itemsTotal) => {},
+    )
+
     return new Promise((resolve, reject) => {
-      new THREE.TextureLoader().load(
+      new THREE.TextureLoader(loadingManager).load(
         url,
         (texture) => resolve(texture), // On load successful
         undefined, // On load in progress (not needed)
