@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
 import { FontLoader } from 'three/addons/loaders/FontLoader.js'
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'
+import * as d3 from 'd3'
 import gsap from 'gsap'
 
 window.addEventListener(
@@ -310,7 +310,7 @@ class App3 {
 
       const response = await fetch(url)
       const json = await response.json()
-      const filtered = json.results.filter(
+      let filtered = json.results.filter(
         (movie) =>
           movie['original_language'] === 'en' &&
           movie['release_date'] !== '' &&
@@ -335,6 +335,13 @@ class App3 {
           this.movieList['2020s'].push(movie)
         }
       })
+
+      // Sort the movies by release date
+      for (const key in this.movieList) {
+        this.movieList[key].sort((a, b) => {
+          return a['release_date'] > b['release_date'] ? 1 : -1
+        })
+      }
     }
   }
 
@@ -448,7 +455,6 @@ class App3 {
           .then((texture) => {
             const material = new THREE.MeshBasicMaterial({
               map: texture,
-              metalness: 1.0,
             })
             plane.material = material
             this.scene.add(plane)
