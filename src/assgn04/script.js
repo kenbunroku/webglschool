@@ -175,8 +175,6 @@ class App3 {
     window.addEventListener(
       'click',
       (event) => {
-        event.preventDefault()
-
         const x = (event.clientX / window.innerWidth) * 2.0 - 1.0
         const y = (event.clientY / window.innerHeight) * 2.0 - 1.0
         const v = new THREE.Vector2(x, -y)
@@ -185,6 +183,7 @@ class App3 {
         const intersects = this.raycaster.intersectObjects(this.planeArray)
 
         if (intersects.length > 0 && !this.isCliked) {
+          event.preventDefault()
           const intersected = intersects[0]
           this.object = intersected.object
           this.objectCopy = this.object.clone()
