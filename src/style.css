@@ -32,3 +32,22 @@ a:visited {
 .grid-container {
   margin-bottom: 24px;
 }
+
+.icon {
+  color: #000;
+  font-size: 36px;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.footer {
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 12px;
+}
