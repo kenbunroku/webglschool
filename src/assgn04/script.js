@@ -281,7 +281,7 @@ class App3 {
       false,
     )
 
-    // wheel event to move the position z of timeFrame based on the wheel event
+    // wheel event to move the position z of timeFrame
     window.addEventListener('wheel', (event) => {
       const speed = event.deltaY * 0.001
       if (
