@@ -1,4 +1,5 @@
 import { WebGLUtility } from './webgl.js'
+import * as dat from 'lil-gui'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -23,13 +24,15 @@ class App {
 
     this.uniformLocation = null
 
-    this.potisionArryay = null
+    this.positionArray = null
     this.positionStride = null
 
-    this.petals = null
-    this.numOfQuads = null
-    this.width = null
-    this.power = null
+    this.params = {
+      petals: 5.0,
+      width: 0.5,
+      numOfQuads: 5.0,
+      power: 3.0,
+    }
 
     this.color = null
     this.colorStride = null
@@ -49,6 +52,13 @@ class App {
     const size = Math.min(window.innerWidth, window.innerHeight)
     this.canvas.width = size
     this.canvas.height = size
+
+    // gui
+    const gui = new dat.GUI()
+    gui.add(this.params, 'petals', 0.0, 10.0).step(1.0)
+    gui.add(this.params, 'width', 0.0, 1.0)
+    gui.add(this.params, 'numOfQuads', 0.0, 20.0)
+    gui.add(this.params, 'power', 0.0, 10.0).step(0.01)
   }
 
   load() {
@@ -85,28 +95,47 @@ class App {
   }
 
   setupGeometry() {
-    const center = [0.0, 0.0, 0.0]
-    const numOfPoints = 6
-    const radius = 0.1 + Math.random() * 0.1
-    const radian = (360 / numOfPoints) * (Math.PI / 180)
+    const numOfQuads = this.params.numOfQuads
+    const petals = this.params.petals
+    const dr = 1 / numOfQuads
+    const rasArray = []
+    const vertices = []
     this.positionArray = []
 
-    for (let i = 0; i < numOfPoints; i++) {
-      const position = []
-      const x = radius * Math.cos(radian * i) + center[0]
-      const y = radius * Math.sin(radian * i) + center[1]
-      const z = center[2]
+    for (let i = 0; i < petals; i++) {
+      let a = ((2 * Math.PI) / petals) * i
+      for (let j = 0; j < numOfQuads; j++) {
+        let r = j / numOfQuads
+        rasArray.push([r, a, 0], [r + dr, a, 0], [r, a, -1])
+        rasArray.push([r, a, 0], [r + dr, a, 0], [r, a, +1])
+        rasArray.push([r + dr, a, 0], [r, a, -1], [r + dr, a, -1])
+        rasArray.push([r + dr, a, 0], [r, a, +1], [r + dr, a, +1])
+      }
+    }
 
-      const x2 = radius * Math.cos(radian * (i + 1)) + center[0]
-      const y2 = radius * Math.sin(radian * (i + 1)) + center[1]
-      const z2 = center[2]
+    for (let ras of rasArray) {
+      const radius = ras[0]
+      const w = 1.0 - Math.pow(radius, this.params.power)
+      let angle = ras[1] + this.params.width * w * ras[2]
 
-      position.push(center[0], center[1], center[2])
-      position.push(x, y, z)
-      position.push(x2, y2, z2)
-      const positionVBO = WebGLUtility.createVBO(this.gl, position)
+      vertices.push([
+        radius * Math.cos(angle),
+        radius * Math.sin(angle),
+        ras[2],
+      ])
+    }
 
-      this.positionArray.push({ position: position, positionVBO: positionVBO })
+    const count = vertices.length / 3
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3
+      const vertex1 = vertices[i3]
+      const vertex2 = vertices[i3 + 1]
+      const vertex3 = vertices[i3 + 2]
+
+      // combine vertices
+      const position = [].concat(vertex1, vertex2, vertex3)
+
+      this.positionArray.push(position)
     }
 
     this.positionStride = 3
@@ -116,7 +145,7 @@ class App {
     this.colorVBO = WebGLUtility.createVBO(this.gl, this.color)
   }
 
-  setupLocation(positionVBO) {
+  setupLocation() {
     const gl = this.gl
 
     this.uniformLocation = {
@@ -152,10 +181,8 @@ class App {
     gl.uniform1f(this.uniformLocation.time, nowTime)
 
     for (let i = 0; i < this.positionArray.length; i++) {
-      const position = this.positionArray[i].position
-      const positionVBO = this.positionArray[i].positionVBO
-      const gl = this.gl
-
+      const position = this.positionArray[i]
+      const positionVBO = WebGLUtility.createVBO(this.gl, position)
       const attPosition = gl.getAttribLocation(this.program, 'position')
       const attColor = gl.getAttribLocation(this.program, 'color')
 
