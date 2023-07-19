@@ -92,25 +92,6 @@ class App {
         )
         this.program = WebGLUtility.createProgramObject(gl, vs, fs)
         resolve()
-        // WebGLUtility.loadFile('../assets/shaders/assgn05/main.vert')
-        //   .then((vertexShaderSource) => {
-        //     vs = WebGLUtility.createShaderObject(
-        //       gl,
-        //       vertexShaderSource,
-        //       gl.VERTEX_SHADER,
-        //     )
-        //     return WebGLUtility.loadFile('../assets/shaders/assgn05/main.frag')
-        //   })
-        //   .then((fragmentShaderSource) => {
-        //     fs = WebGLUtility.createShaderObject(
-        //       gl,
-        //       fragmentShaderSource,
-        //       gl.FRAGMENT_SHADER,
-        //     )
-        //     this.program = WebGLUtility.createProgramObject(gl, vs, fs)
-
-        //     resolve()
-        //   })
       }
     })
   }
