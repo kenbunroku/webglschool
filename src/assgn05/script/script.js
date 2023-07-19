@@ -158,7 +158,7 @@ class App {
   setupRendering() {
     const gl = this.gl
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-    gl.clear(0.3, 0.3, 0.3, 1.0)
+    gl.clearColor(1.0, 1.0, 1.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
   }
 
