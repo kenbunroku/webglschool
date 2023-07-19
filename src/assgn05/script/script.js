@@ -193,7 +193,7 @@ class App {
 
     const attPosition = gl.getAttribLocation(this.program, 'position')
 
-    for (let i = 0; i < this.positionArray.length; i++) {
+    for (let i = 0; i < this.positionVBOs.length; i++) {
       const positionVBO = this.positionVBOs[i]
       WebGLUtility.enableAttribute(
         gl,
