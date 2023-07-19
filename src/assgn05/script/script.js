@@ -141,6 +141,10 @@ class App {
       this.positionArray.push(position)
     }
 
+    this.positionVBOs = this.positionArray.map((position) =>
+      WebGLUtility.createVBO(this.gl, position),
+    )
+
     this.positionStride = 3
 
     this.color = [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0]
@@ -150,6 +154,10 @@ class App {
 
   setupLocation() {
     const gl = this.gl
+
+    const attColor = gl.getAttribLocation(this.program, 'color')
+
+    WebGLUtility.enableAttribute(gl, this.colorVBO, attColor, this.colorStride)
 
     this.uniformLocation = {
       time: gl.getUniformLocation(this.program, 'time'),
@@ -183,26 +191,22 @@ class App {
 
     gl.uniform1f(this.uniformLocation.time, nowTime)
 
-    for (let i = 0; i < this.positionArray.length; i++) {
-      const position = this.positionArray[i]
-      const positionVBO = WebGLUtility.createVBO(this.gl, position)
-      const attPosition = gl.getAttribLocation(this.program, 'position')
-      const attColor = gl.getAttribLocation(this.program, 'color')
+    const attPosition = gl.getAttribLocation(this.program, 'position')
 
+    for (let i = 0; i < this.positionArray.length; i++) {
+      const positionVBO = this.positionVBOs[i]
       WebGLUtility.enableAttribute(
         gl,
         positionVBO,
         attPosition,
         this.positionStride,
       )
-      WebGLUtility.enableAttribute(
-        gl,
-        this.colorVBO,
-        attColor,
-        this.colorStride,
-      )
 
-      gl.drawArrays(gl.TRIANGLES, 0, position.length / this.positionStride)
+      gl.drawArrays(
+        gl.TRIANGLES,
+        0,
+        this.positionArray[i].length / this.positionStride,
+      )
     }
   }
 }
