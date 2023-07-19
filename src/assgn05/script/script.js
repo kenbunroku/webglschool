@@ -55,10 +55,19 @@ class App {
 
     // gui
     const gui = new dat.GUI()
-    gui.add(this.params, 'petals', 0.0, 10.0).step(1.0)
-    gui.add(this.params, 'width', 0.0, 1.0)
-    gui.add(this.params, 'numOfQuads', 0.0, 20.0)
-    gui.add(this.params, 'power', 0.0, 10.0).step(0.01)
+    gui
+      .add(this.params, 'petals', 1.0, 10.0)
+      .step(1.0)
+      .onChange(() => this.setupGeometry())
+    gui.add(this.params, 'width', 0.0, 1.0).onChange(() => this.setupGeometry())
+    gui
+      .add(this.params, 'numOfQuads', 2.0, 20.0)
+      .step(1.0)
+      .onChange(() => this.setupGeometry())
+    gui
+      .add(this.params, 'power', 0.01, 10.0)
+      .step(0.01)
+      .onChange(() => this.setupGeometry())
   }
 
   load() {
