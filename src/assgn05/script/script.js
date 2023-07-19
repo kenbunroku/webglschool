@@ -1,5 +1,7 @@
 import { WebGLUtility } from './webgl.js'
 import * as dat from 'lil-gui'
+import vertexShaderSource from '/@shaders/assgn05/main.vert'
+import fragmentShaderSource from '/@shaders/assgn05/main.frag'
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -78,27 +80,37 @@ class App {
         const error = new Error('not initialized')
         reject(error)
       } else {
-        let vs = null
-        let fs = null
-        WebGLUtility.loadFile('./shader/main.vert')
-          .then((vertexShaderSource) => {
-            vs = WebGLUtility.createShaderObject(
-              gl,
-              vertexShaderSource,
-              gl.VERTEX_SHADER,
-            )
-            return WebGLUtility.loadFile('./shader/main.frag')
-          })
-          .then((fragmentShaderSource) => {
-            fs = WebGLUtility.createShaderObject(
-              gl,
-              fragmentShaderSource,
-              gl.FRAGMENT_SHADER,
-            )
-            this.program = WebGLUtility.createProgramObject(gl, vs, fs)
+        let vs = WebGLUtility.createShaderObject(
+          gl,
+          vertexShaderSource,
+          gl.VERTEX_SHADER,
+        )
+        let fs = WebGLUtility.createShaderObject(
+          gl,
+          fragmentShaderSource,
+          gl.FRAGMENT_SHADER,
+        )
+        this.program = WebGLUtility.createProgramObject(gl, vs, fs)
+        resolve()
+        // WebGLUtility.loadFile('../assets/shaders/assgn05/main.vert')
+        //   .then((vertexShaderSource) => {
+        //     vs = WebGLUtility.createShaderObject(
+        //       gl,
+        //       vertexShaderSource,
+        //       gl.VERTEX_SHADER,
+        //     )
+        //     return WebGLUtility.loadFile('../assets/shaders/assgn05/main.frag')
+        //   })
+        //   .then((fragmentShaderSource) => {
+        //     fs = WebGLUtility.createShaderObject(
+        //       gl,
+        //       fragmentShaderSource,
+        //       gl.FRAGMENT_SHADER,
+        //     )
+        //     this.program = WebGLUtility.createProgramObject(gl, vs, fs)
 
-            resolve()
-          })
+        //     resolve()
+        //   })
       }
     })
   }
