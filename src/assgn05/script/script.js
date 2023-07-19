@@ -65,6 +65,7 @@ class App {
     gui
       .add(this.params, 'numOfQuads', 2.0, 20.0)
       .step(1.0)
+      .name('number of quads')
       .onChange(() => this.setupGeometry())
     gui
       .add(this.params, 'power', 0.01, 10.0)
