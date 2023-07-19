@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import glsl from 'vite-plugin-glsl'
 
 export default defineConfig({
+  plugins: [glsl()],
   root: 'src',
   publicDir: '../public/',
   base: '/webglschool/',
@@ -26,5 +27,4 @@ export default defineConfig({
       },
     },
   },
-  plugins: [glsl()],
 })
