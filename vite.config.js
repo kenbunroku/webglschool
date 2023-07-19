@@ -1,5 +1,6 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
+import glsl from 'vite-plugin-glsl'
 
 export default defineConfig({
   root: 'src',
@@ -23,6 +24,12 @@ export default defineConfig({
         // assgn07: resolve(__dirname, 'src/assgn07/index.html'),
         // assgn08: resolve(__dirname, 'src/assgn08/index.html'),
       },
+    },
+  },
+  plugins: [glsl()],
+  resolve: {
+    alias: {
+      '/@shaders/': `${process.cwd()}/src/assets/shaders/`,
     },
   },
 })
