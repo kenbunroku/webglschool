@@ -13,7 +13,7 @@ void main() {
   float angle = atan(position.y, position.x);
 
   
-  float distance = length(position) - 0.2;
+  float distance = length(position.xy);
 
   
   angle += cos(time) * distance * 0.5;
