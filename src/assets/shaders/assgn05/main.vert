@@ -5,6 +5,7 @@ varying vec4 vColor;
 varying float vDistance;
 
 uniform float time;
+uniform float numOfQuads;
 
 void main() {
   vColor = color;
@@ -13,7 +14,7 @@ void main() {
   float angle = atan(position.y, position.x);
 
   // distance of position
-  float distance = length(position.xy);
+  float distance = length(position.xy) - numOfQuads / 100.0;
 
   // new angle
   angle += cos(time) * distance * 0.5;
