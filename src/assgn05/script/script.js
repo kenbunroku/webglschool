@@ -161,6 +161,7 @@ class App {
 
     this.uniformLocation = {
       time: gl.getUniformLocation(this.program, 'time'),
+      numOfQuads: gl.getUniformLocation(this.program, 'numOfQuads'),
     }
   }
 
@@ -190,6 +191,7 @@ class App {
     gl.useProgram(this.program)
 
     gl.uniform1f(this.uniformLocation.time, nowTime)
+    gl.uniform1f(this.uniformLocation.numOfQuads, this.params.numOfQuads)
 
     const attPosition = gl.getAttribLocation(this.program, 'position')
 
