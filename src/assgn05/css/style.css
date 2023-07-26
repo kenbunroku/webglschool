@@ -12,7 +12,9 @@ body {
   height: 100%;
   overflow: hidden;
 }
-
+a:visited {
+  color: #fff;
+}
 canvas {
   margin: 0px auto;
 }
