@@ -4,23 +4,25 @@ import"./modulepreload-polyfill-3cfb730f.js";class vt{static loadFile(r){return 
 attribute vec3 normal;
 attribute vec4 color;
 uniform mat4 mvpMatrix;
-uniform mat4 normalMatrix;
 varying vec4 vColor;
-
-const vec3 light = vec3(1.0, 1.0, 1.0);
+varying vec4 vNormal;
 
 void main(){
-    vec3 n = (normalMatrix * vec4(normal, 0.0)).xyz;
+    vNormal = vec4(normal, 0.0);
 
-    float d = dot(normalize(n), normalize(light));
-
-    vColor = vec4(color.rgb * d, color.a);
+    vColor = color;
 
     gl_Position = mvpMatrix * vec4(position, 1.0);
 }`,xa=`precision mediump float;
-
+uniform mat4 normalMatrix;
 varying vec4 vColor;
+varying vec4 vNormal;
+
+const vec3 light = vec3(1.0, 1.0, 1.0);
 
 void main() {
-    gl_FragColor = vColor;
+    vec3 n = (normalMatrix * vNormal).xyz;
+    float d = dot(normalize(n), normalize(light));
+
+    gl_FragColor = vec4(vColor.rgb * d, vColor.a);
 }`;window.addEventListener("DOMContentLoaded",()=>{const J=new Ca;J.init(),J.load().then(()=>{J.setupGeometry(),J.setupLocation(),J.start()});const r=new wa.Pane,o={culling:!0,depthTest:!0,rotation:!1};r.addInput(o,"culling").on("change",a=>{J.setCulling(a.value)}),r.addInput(o,"depthTest").on("change",a=>{J.setDepthTest(a.value)}),r.addInput(o,"rotation").on("change",a=>{J.setRotation(a.value)})},!1);class Ca{constructor(){this.canvas=null,this.gl=null,this.program=null,this.attributeLocation=null,this.attributeStride=null,this.uniformLocation=null,this.torusGeometry=null,this.torusVBO=null,this.torusIBO=null,this.startTime=null,this.camera=null,this.isRender=!1,this.isRotation=!1,this.resize=this.resize.bind(this),this.render=this.render.bind(this)}setCulling(r){const o=this.gl;o!=null&&(r===!0?o.enable(o.CULL_FACE):o.disable(o.CULL_FACE))}setDepthTest(r){const o=this.gl;o!=null&&(r===!0?o.enable(o.DEPTH_TEST):o.disable(o.DEPTH_TEST))}setRotation(r){this.isRotation=r}init(){this.canvas=document.getElementById("webgl-canvas"),this.gl=vt.createWebGLContext(this.canvas);const r={distance:5,min:1,max:10,move:2};this.camera=new jt(this.canvas,r),this.resize(),window.addEventListener("resize",this.resize,!1),this.gl.enable(this.gl.CULL_FACE),this.gl.enable(this.gl.DEPTH_TEST)}resize(){this.canvas.width=window.innerWidth,this.canvas.height=window.innerHeight}load(){return new Promise((r,o)=>{const a=this.gl;if(a==null){const c=new Error("not initialized");o(c)}else{let c=vt.createShaderObject(a,ga,a.VERTEX_SHADER),l=vt.createShaderObject(a,xa,a.FRAGMENT_SHADER);this.program=vt.createProgramObject(a,c,l),r()}})}setupGeometry(){const l=[1,1,1,1];this.torusGeometry=ba.torus(32,32,.4,.8,l),this.torusVBO=[vt.createVBO(this.gl,this.torusGeometry.position),vt.createVBO(this.gl,this.torusGeometry.normal),vt.createVBO(this.gl,this.torusGeometry.color)],this.torusIBO=vt.createIBO(this.gl,this.torusGeometry.index)}setupLocation(){const r=this.gl;this.attributeLocation=[r.getAttribLocation(this.program,"position"),r.getAttribLocation(this.program,"normal"),r.getAttribLocation(this.program,"color")],this.attributeStride=[3,3,4],this.uniformLocation={mvpMatrix:r.getUniformLocation(this.program,"mvpMatrix"),normalMatrix:r.getUniformLocation(this.program,"normalMatrix")}}setupRendering(){const r=this.gl;r.viewport(0,0,this.canvas.width,this.canvas.height),r.clearColor(.3,.3,.3,1),r.clearDepth(1),r.clear(r.COLOR_BUFFER_BIT|r.DEPTH_BUFFER_BIT)}start(){this.startTime=Date.now(),this.isRender=!0,this.render()}stop(){this.isRender=!1}render(){const r=this.gl,o=Ut.Mat4,a=Ut.Vec3;this.isRender===!0&&requestAnimationFrame(this.render);const c=(Date.now()-this.startTime)*.001;this.setupRendering();const l=a.create(0,1,0),u=this.isRotation===!0?o.rotate(o.identity(),c,l):o.identity(),h=this.camera.update(),m=45,g=window.innerWidth/window.innerHeight,_=.1,v=10,w=o.perspective(m,g,_,v),C=o.multiply(w,h),S=o.multiply(C,u),f=o.transpose(o.inverse(u));r.useProgram(this.program),r.uniformMatrix4fv(this.uniformLocation.mvpMatrix,!1,S),r.uniformMatrix4fv(this.uniformLocation.normalMatrix,!1,f),vt.enableBuffer(r,this.torusVBO,this.attributeLocation,this.attributeStride,this.torusIBO),r.drawElements(r.TRIANGLES,this.torusGeometry.index.length,r.UNSIGNED_SHORT,0)}}
