@@ -6,7 +6,7 @@ uniform mat4 normalMatrix;
 varying vec4 vColor;
 
 // Initial light vector
-const vec3 light = vec3(0.0, 0.0, 1.0);
+const vec3 light = vec3(1.0, 1.0, 1.0);
 
 void main(){
     vec3 n = (normalMatrix * vec4(normal, 0.0)).xyz;
