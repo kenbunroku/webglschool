@@ -142,7 +142,7 @@ class App {
     const innerRadius = 0.4
     const outerRadius = 0.8
     const color = [1.0, 1.0, 1.0, 1.0]
-    this.torusGeometry = WebGLGeometry.createTorus(
+    this.torusGeometry = WebGLGeometry.torus(
       row,
       column,
       innerRadius,
@@ -185,7 +185,7 @@ class App {
     // Set viewport
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
     // Set clear color and depth
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clearColor(0.3, 0.3, 0.3, 1.0)
     gl.clearDepth(1.0)
     // Clear color and depth
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -197,6 +197,10 @@ class App {
     this.render()
   }
 
+  stop(){
+    this.isRender = false
+  }
+
   render() {
     const gl = this.gl
     const m4 = WebGLMath.Mat4
@@ -205,13 +209,13 @@ class App {
     if (this.isRender === true) requestAnimationFrame(this.render)
 
     // Delta time
-    const nowTime = (Date.now() - this.startTime) % 0.001
+    const nowTime = (Date.now() - this.startTime) * 0.001
 
     // Set rendering settings
     this.setupRendering()
 
     // Rotation
-    const rotateAxis = new v3(0.0, 1.0, 0.0)
+    const rotateAxis = v3.create(0.0, 1.0, 0.0)
     const m =
       this.isRotation === true
         ? m4.rotate(m4.identity(), nowTime, rotateAxis)
@@ -220,7 +224,7 @@ class App {
     // View projection matrix
     const v = this.camera.update()
     const fovy = 45
-    const aspect = this.canvas.width / this.canvas.height
+    const aspect = window.width / window.height
     const near = 0.1
     const far = 10.0
     const p = m4.perspective(fovy, aspect, near, far)
