@@ -1,5 +1,5 @@
 attribute vec3 position;
-attribute vec3 nomal;
+attribute vec3 normal;
 attribute vec4 color;
 uniform mat4 mvpMatrix;
 uniform mat4 normalMatrix;
@@ -11,7 +11,7 @@ const vec3 light = vec3(0.0, 0.0, 1.0);
 void main(){
     vec3 n = (normalMatrix * vec4(normal, 0.0)).xyz;
 
-    float d = dot(normalize(n), normalize(light))
+    float d = dot(normalize(n), normalize(light));
 
     vColor = vec4(color.rgb * d, color.a);
 
