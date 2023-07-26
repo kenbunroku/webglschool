@@ -11,8 +11,11 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  color:#fff;
 }
-
+a:visited {
+  color: #fff;
+}
 canvas {
   margin: 0px auto;
 }
@@ -32,7 +35,7 @@ canvas {
   bottom: 10px;
   left: 0px;
   margin-left: 20px;
-  color: #000;
+  color: #fff;
   font-size: 36px;
   cursor: pointer;
 }
