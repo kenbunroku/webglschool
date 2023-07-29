@@ -54,6 +54,9 @@ class App {
     this.torusGeometry = null;
     this.torusVBO = null;
     this.torusIBO = null;
+    this.sphereGeometry = null;
+    this.sphereVBO = null;
+    this.sphereIBO = null;
     this.startTime = null;
     this.camera = null;
     this.isRender = false;
@@ -122,11 +125,13 @@ class App {
         let vs = WebGLUtility.createShaderObject(
           gl,
           vertexShaderSource,
-          gl.VERTEX_SHADER)
+          gl.VERTEX_SHADER
+        );
         let fs = WebGLUtility.createShaderObject(
           gl,
           fragmentShaderSource,
-          gl.FRAGMENT_SHADER)
+          gl.FRAGMENT_SHADER
+        );
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
         resolve();
       }
@@ -155,6 +160,28 @@ class App {
       WebGLUtility.createVBO(this.gl, this.torusGeometry.color),
     ];
     this.torusIBO = WebGLUtility.createIBO(this.gl, this.torusGeometry.index);
+
+    // Get sphere parameters
+    const latitude = 32;
+    const longitude = 32;
+    const radius = 0.05;
+    const color2 = [1.0, 0.0, 0.0, 1.0];
+    this.sphereGeometry = WebGLGeometry.sphere(
+      latitude,
+      longitude,
+      radius,
+      color2
+    );
+    for (let i = 0; i < this.sphereGeometry.position.length; i++) {
+      this.sphereGeometry.position[i] += 1.0;
+    }
+    // Generate VBO and IBO
+    this.sphereVBO = [
+      WebGLUtility.createVBO(this.gl, this.sphereGeometry.position),
+      WebGLUtility.createVBO(this.gl, this.sphereGeometry.normal),
+      WebGLUtility.createVBO(this.gl, this.sphereGeometry.color),
+    ];
+    this.sphereIBO = WebGLUtility.createIBO(this.gl, this.sphereGeometry.index);
   }
 
   setupLocation() {
@@ -246,6 +273,21 @@ class App {
     gl.drawElements(
       gl.TRIANGLES,
       this.torusGeometry.index.length,
+      gl.UNSIGNED_SHORT,
+      0
+    );
+
+    // Set up VBO and IBO and draw
+    WebGLUtility.enableBuffer(
+      gl,
+      this.sphereVBO,
+      this.attributeLocation,
+      this.attributeStride,
+      this.sphereIBO
+    );
+    gl.drawElements(
+      gl.TRIANGLES,
+      this.sphereGeometry.index.length,
       gl.UNSIGNED_SHORT,
       0
     );
