@@ -4,9 +4,11 @@ attribute vec4 color;
 uniform mat4 mvpMatrix;
 varying vec4 vColor;
 varying vec4 vNormal;
+varying vec3 vPosition;
 
 void main(){
     vNormal = vec4(normal, 0.0);
+    vPosition = position;
 
     vColor = color;
 

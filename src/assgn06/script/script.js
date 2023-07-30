@@ -62,6 +62,10 @@ class App {
     this.isRender = false;
     this.isRotation = false;
 
+    this.lightColor = [1.0, 1.0, 1.0];
+    this.lightColor2 = [1.0, 0.0, 0.0];
+    this.lightColor3 = [0.0, 1.0, 0.0];
+
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
   }
@@ -173,7 +177,7 @@ class App {
       color2
     );
     for (let i = 0; i < this.sphereGeometry.position.length; i++) {
-      this.sphereGeometry.position[i] += 1.0;
+      this.sphereGeometry.position[i] += 2.0;
     }
     // Generate VBO and IBO
     this.sphereVBO = [
@@ -201,13 +205,18 @@ class App {
     this.uniformLocation = {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
+      lightPosition: gl.getUniformLocation(this.program, "lightPosition"),
+      lightPosition2: gl.getUniformLocation(this.program, "lightPosition2"),
+      lightColor: gl.getUniformLocation(this.program, "lightColor"),
+      lightColor2: gl.getUniformLocation(this.program, "lightColor2"),
+      lightColor3: gl.getUniformLocation(this.program, "lightColor3"),
     };
   }
 
   setupRendering() {
     const gl = this.gl;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    gl.clearColor(0.3, 0.3, 0.3, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
@@ -257,10 +266,19 @@ class App {
     // Normal matrix
     const normalMatrix = m4.transpose(m4.inverse(m));
 
+    // Light position
+    const lightPosition = v3.create(2.0, 2.0, 2.0);
+    const lightPosition2 = v3.create(-1.0, 1.0, 1.0);
+
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
+    gl.uniform3fv(this.uniformLocation.lightPosition, lightPosition);
+    gl.uniform3fv(this.uniformLocation.lightPosition2, lightPosition2);
+    gl.uniform3fv(this.uniformLocation.lightColor, this.lightColor);
+    gl.uniform3fv(this.uniformLocation.lightColor2, this.lightColor2);
+    gl.uniform3fv(this.uniformLocation.lightColor3, this.lightColor3);
 
     // Set up VBO and IBO and draw
     WebGLUtility.enableBuffer(
