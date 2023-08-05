@@ -19,10 +19,11 @@ void main() {
     vec3 pointLightDirection = lightPosition - vPosition;
     float d2 = clamp(dot(normalize(n), normalize(pointLightDirection)), 0.0, 1.0);
 
+
     vec3 pointLightDirection2 = lightPosition2 - vPosition;
     float d3 = clamp(dot(normalize(n), normalize(pointLightDirection2)), 0.0, 1.0);
 
-    vec3 combinedLight = d * 0.5 + d2 * lightColor2 + d3 * lightColor3;
+    vec3 combinedLight = d * lightColor * 0.5 + d2 * lightColor2 + d3 * lightColor3;
 
     gl_FragColor = vec4(vColor.rgb * combinedLight, vColor.a);
 }
