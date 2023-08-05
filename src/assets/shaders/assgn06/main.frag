@@ -1,10 +1,13 @@
 precision mediump float;
+
+uniform float intensity;
 uniform vec3 lightPosition;
 uniform vec3 lightPosition2;
 uniform vec3 lightColor;
 uniform vec3 lightColor2;
 uniform vec3 lightColor3;
 uniform mat4 normalMatrix;
+
 varying vec4 vColor;
 varying vec4 vNormal;
 varying vec3 vPosition;
@@ -23,7 +26,7 @@ void main() {
     vec3 pointLightDirection2 = lightPosition2 - vPosition;
     float d3 = clamp(dot(normalize(n), normalize(pointLightDirection2)), 0.0, 1.0);
 
-    vec3 combinedLight = d * lightColor * 0.5 + d2 * lightColor2 + d3 * lightColor3;
+    vec3 combinedLight = d * lightColor * intensity + d2 * lightColor2 + d3 * lightColor3;
 
     gl_FragColor = vec4(vColor.rgb * combinedLight, vColor.a);
 }
