@@ -17,16 +17,17 @@ const vec3 light = vec3(1.0, 1.0, 1.0);
 
 void main() {
     vec3 n = (normalMatrix * vNormal).xyz;
-    float d = clamp(dot(normalize(n), normalize(light)), 0.1, 1.0);
+    float d = clamp(dot(normalize(n), normalize(light)), 0.0, 1.0);
 
     vec3 pointLightDirection = lightPosition - vPosition;
     float d2 = clamp(dot(normalize(n), normalize(pointLightDirection)), 0.0, 1.0);
 
-
     vec3 pointLightDirection2 = lightPosition2 - vPosition;
     float d3 = clamp(dot(normalize(n), normalize(pointLightDirection2)), 0.0, 1.0);
 
-    vec3 combinedLight = d * lightColor * intensity + d2 * lightColor2 + d3 * lightColor3;
+    vec3 ambient = vec3(0.1, 0.1, 0.1);
+
+    vec3 combinedLight = d * lightColor * intensity + d2 * lightColor2 + d3 * lightColor3 + ambient;
 
     gl_FragColor = vec4(vColor.rgb * combinedLight, vColor.a);
 }
