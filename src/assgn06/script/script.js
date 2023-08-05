@@ -2,7 +2,7 @@ import { WebGLUtility } from "./webgl.js";
 import { WebGLMath } from "./math.js";
 import { WebGLGeometry } from "./geometry.js";
 import { WebGLOrbitCamera } from "./camera.js";
-import { Pane } from "tweakpane";
+// import { Pane } from "tweakpane";
 import * as dat from "lil-gui";
 
 import vertexShaderSource from "/@shaders/assgn06/main.vert";
@@ -19,26 +19,26 @@ window.addEventListener(
       app.start();
     });
 
-    // Set up tweakpane
-    const pane = new Pane();
-    const parameter = {
-      culling: true,
-      depthTest: true,
-      rotation: false,
-    };
+    // // Set up tweakpane
+    // const pane = new Pane();
+    // const parameter = {
+    //   culling: true,
+    //   depthTest: true,
+    //   rotation: false,
+    // };
 
-    // Activate backface culling
-    pane.addInput(parameter, "culling").on("change", (v) => {
-      app.setCulling(v.value);
-    });
-    // Activate depth test
-    pane.addInput(parameter, "depthTest").on("change", (v) => {
-      app.setDepthTest(v.value);
-    });
-    // Activate rotation
-    pane.addInput(parameter, "rotation").on("change", (v) => {
-      app.setRotation(v.value);
-    });
+    // // Activate backface culling
+    // pane.addInput(parameter, "culling").on("change", (v) => {
+    //   app.setCulling(v.value);
+    // });
+    // // Activate depth test
+    // pane.addInput(parameter, "depthTest").on("change", (v) => {
+    //   app.setDepthTest(v.value);
+    // });
+    // // Activate rotation
+    // pane.addInput(parameter, "rotation").on("change", (v) => {
+    //   app.setRotation(v.value);
+    // });
   },
   false
 );
