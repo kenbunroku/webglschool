@@ -3,6 +3,7 @@ import { WebGLMath } from "./math.js";
 import { WebGLGeometry } from "./geometry.js";
 import { WebGLOrbitCamera } from "./camera.js";
 import { Pane } from "tweakpane";
+import * as dat from "lil-gui";
 
 import vertexShaderSource from "/@shaders/assgn06/main.vert";
 import fragmentShaderSource from "/@shaders/assgn06/main.frag";
@@ -62,9 +63,13 @@ class App {
     this.isRender = false;
     this.isRotation = false;
 
+    this.isDirectionalLight = true;
     this.lightColor = [1.0, 1.0, 1.0];
-    this.lightColor2 = [1.0, 0.0, 0.0];
-    this.lightColor3 = [0.0, 1.0, 0.0];
+
+    this.isPointLight1 = false;
+    this.lightColor2 = null;
+    this.isPointLight2 = false;
+    this.lightColor3 = null;
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -112,6 +117,12 @@ class App {
 
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
+
+    // gui
+    const gui = new dat.GUI();
+    const lightFolder = gui.addFolder("Point Light");
+    lightFolder.add(this, "isPointLight1").name("Point Light 1");
+    lightFolder.add(this, "isPointLight2").name("Point Light 2");
   }
 
   resize() {
@@ -235,6 +246,14 @@ class App {
     const gl = this.gl;
     const m4 = WebGLMath.Mat4;
     const v3 = WebGLMath.Vec3;
+
+    this.isPointLight1
+      ? (this.lightColor2 = [1.0, 0.0, 0.0])
+      : (this.lightColor2 = [0.0, 0.0, 0.0]);
+
+    this.isPointLight2
+      ? (this.lightColor3 = [0.0, 1.0, 0.0])
+      : (this.lightColor3 = [0.0, 0.0, 0.0]);
 
     if (this.isRender === true) requestAnimationFrame(this.render);
 
