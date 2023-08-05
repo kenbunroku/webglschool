@@ -65,6 +65,7 @@ class App {
 
     this.isDirectionalLight = true;
     this.lightColor = [1.0, 1.0, 1.0];
+    this.intensity = 0.5;
 
     this.isPointLight1 = false;
     this.lightColor2 = null;
@@ -120,9 +121,14 @@ class App {
 
     // gui
     const gui = new dat.GUI();
-    const lightFolder = gui.addFolder("Point Light");
-    lightFolder.add(this, "isPointLight1").name("Point Light 1");
-    lightFolder.add(this, "isPointLight2").name("Point Light 2");
+    const directionalLightFolder = gui.addFolder("Directional Light");
+    directionalLightFolder.add(this, "isDirectionalLight").name("On/Off");
+    directionalLightFolder.addColor(this, "lightColor").name("Color");
+    directionalLightFolder.add(this, "intensity", 0.0, 1.0).name("Intensity");
+
+    const pointLightFolder = gui.addFolder("Point Light");
+    pointLightFolder.add(this, "isPointLight1").name("Point Light 1");
+    pointLightFolder.add(this, "isPointLight2").name("Point Light 2");
   }
 
   resize() {
@@ -217,6 +223,7 @@ class App {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
       lightPosition: gl.getUniformLocation(this.program, "lightPosition"),
+      intensity: gl.getUniformLocation(this.program, "intensity"),
       lightPosition2: gl.getUniformLocation(this.program, "lightPosition2"),
       lightColor: gl.getUniformLocation(this.program, "lightColor"),
       lightColor2: gl.getUniformLocation(this.program, "lightColor2"),
@@ -293,6 +300,7 @@ class App {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
+    gl.uniform1f(this.uniformLocation.intensity, this.intensity);
     gl.uniform3fv(this.uniformLocation.lightPosition, lightPosition);
     gl.uniform3fv(this.uniformLocation.lightPosition2, lightPosition2);
     gl.uniform3fv(this.uniformLocation.lightColor, this.lightColor);
