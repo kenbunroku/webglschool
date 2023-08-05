@@ -293,7 +293,7 @@ class App {
     const normalMatrix = m4.transpose(m4.inverse(m));
 
     // Light position
-    const lightPosition = v3.create(2.0, 2.0, 2.0);
+    const lightPosition = v3.create(1.0, 1.0, 1.0);
     const lightPosition2 = v3.create(-1.0, 1.0, 1.0);
 
     // Update uniform variables
