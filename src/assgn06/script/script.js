@@ -68,9 +68,9 @@ class App {
     this.intensity = 0.5;
 
     this.isPointLight1 = false;
-    this.lightColor2 = null;
+    this.lightColor2 = [0.0, 0.0, 0.0];
     this.isPointLight2 = false;
-    this.lightColor3 = null;
+    this.lightColor3 = [0.0, 0.0, 0.0];
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -122,13 +122,39 @@ class App {
     // gui
     const gui = new dat.GUI();
     const directionalLightFolder = gui.addFolder("Directional Light");
-    directionalLightFolder.add(this, "isDirectionalLight").name("On/Off");
+    directionalLightFolder
+      .add(this, "isDirectionalLight")
+      .name("On/Off")
+      .onChange((value) => {
+        !value ? (this.intensity = 0.0) : (this.intensity = 0.5);
+      });
     directionalLightFolder.addColor(this, "lightColor").name("Color");
-    directionalLightFolder.add(this, "intensity", 0.0, 1.0).name("Intensity");
+    directionalLightFolder
+      .add(this, "intensity", 0.0, 1.0)
+      .name("Intensity")
+      .onChange((value) => {
+        this.isDirectionalLight
+          ? (this.intensity = value)
+          : (this.intensity = 0.0);
+      });
 
     const pointLightFolder = gui.addFolder("Point Light");
-    pointLightFolder.add(this, "isPointLight1").name("Point Light 1");
-    pointLightFolder.add(this, "isPointLight2").name("Point Light 2");
+    pointLightFolder
+      .add(this, "isPointLight1")
+      .name("Point Light 1")
+      .onChange(() => {
+        this.isPointLight1
+          ? (this.lightColor2 = [1.0, 0.0, 0.0])
+          : (this.lightColor2 = [0.0, 0.0, 0.0]);
+      });
+    pointLightFolder
+      .add(this, "isPointLight2")
+      .name("Point Light 2")
+      .onChange(() => {
+        this.isPointLight2
+          ? (this.lightColor3 = [0.0, 1.0, 0.0])
+          : (this.lightColor3 = [0.0, 0.0, 0.0]);
+      });
   }
 
   resize() {
@@ -253,14 +279,6 @@ class App {
     const gl = this.gl;
     const m4 = WebGLMath.Mat4;
     const v3 = WebGLMath.Vec3;
-
-    this.isPointLight1
-      ? (this.lightColor2 = [1.0, 0.0, 0.0])
-      : (this.lightColor2 = [0.0, 0.0, 0.0]);
-
-    this.isPointLight2
-      ? (this.lightColor3 = [0.0, 1.0, 0.0])
-      : (this.lightColor3 = [0.0, 0.0, 0.0]);
 
     if (this.isRender === true) requestAnimationFrame(this.render);
 
