@@ -80,6 +80,10 @@ export class WebGLOrbitCamera {
     )
   }
 
+  setPosition(vec3) {
+    this.defaultPosition = vec3
+  }
+
   /**
    * マウスボタンが押された際のイベント
    */
