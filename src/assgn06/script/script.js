@@ -250,9 +250,15 @@ class App {
     this.uniformLocation = {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
-      lightPosition: gl.getUniformLocation(this.program, "lightPosition"),
+      pointLightPosition1: gl.getUniformLocation(
+        this.program,
+        "pointLightPosition1"
+      ),
       intensity: gl.getUniformLocation(this.program, "intensity"),
-      lightPosition2: gl.getUniformLocation(this.program, "lightPosition2"),
+      pointLightPosition2: gl.getUniformLocation(
+        this.program,
+        "pointLightPosition2"
+      ),
       lightColor: gl.getUniformLocation(this.program, "lightColor"),
       lightColor2: gl.getUniformLocation(this.program, "lightColor2"),
       lightColor3: gl.getUniformLocation(this.program, "lightColor3"),
@@ -313,16 +319,20 @@ class App {
     const normalMatrix = m4.transpose(m4.inverse(m));
 
     // Light position
-    const lightPosition = v3.create(1.0, 1.0, 1.0);
-    const lightPosition2 = v3.create(-1.0, 1.0, 1.0);
+    const pointLightPosition1 = v3.create(1.0, 1.0, 1.0);
+    const pointLightPosition2 = v3.create(-1.0, 1.0, 1.0);
+    const spotLightPosition = v3.create(-1.0, 1.0, 1.0);
+
+    // Light target
+    const spotLightTarget = v3.create(0.0, 0.0, 0.0);
 
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
     gl.uniform1f(this.uniformLocation.intensity, this.intensity);
-    gl.uniform3fv(this.uniformLocation.lightPosition, lightPosition);
-    gl.uniform3fv(this.uniformLocation.lightPosition2, lightPosition2);
+    gl.uniform3fv(this.uniformLocation.pointLightPosition1, pointLightPosition1);
+    gl.uniform3fv(this.uniformLocation.pointLightPosition2, pointLightPosition2);
     gl.uniform3fv(this.uniformLocation.lightColor, this.lightColor);
     gl.uniform3fv(this.uniformLocation.lightColor2, this.lightColor2);
     gl.uniform3fv(this.uniformLocation.lightColor3, this.lightColor3);
