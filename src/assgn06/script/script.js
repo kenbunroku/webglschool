@@ -103,6 +103,7 @@ class App {
   init() {
     this.canvas = document.getElementById("webgl-canvas");
     this.gl = WebGLUtility.createWebGLContext(this.canvas);
+    const vec3 = WebGLMath.Vec3;
 
     const cameraOption = {
       distance: 5.0,
@@ -111,6 +112,7 @@ class App {
       move: 2.0,
     };
     this.camera = new WebGLOrbitCamera(this.canvas, cameraOption);
+    this.camera.setPosition(vec3.create(1.0, 2.0, 5.0));
 
     this.resize();
 
