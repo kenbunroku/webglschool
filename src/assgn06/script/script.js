@@ -91,13 +91,13 @@ class App {
     const vec3 = WebGLMath.Vec3;
 
     const cameraOption = {
-      distance: 5.0,
+      distance: 4.0,
       min: 1.0,
       max: 10.0,
       move: 2.0,
     };
     this.camera = new WebGLOrbitCamera(this.canvas, cameraOption);
-    this.camera.setPosition(vec3.create(1.0, 2.0, 5.0));
+    this.camera.setPosition(vec3.create(0.0, 3.0, cameraOption.distance));
 
     this.resize();
 
