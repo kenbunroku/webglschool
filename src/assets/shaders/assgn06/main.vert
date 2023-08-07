@@ -3,11 +3,11 @@ attribute vec3 normal;
 attribute vec4 color;
 uniform mat4 mvpMatrix;
 varying vec4 vColor;
-varying vec4 vNormal;
+varying vec3 vNormal;
 varying vec3 vPosition;
 
 void main(){
-    vNormal = vec4(normal, 0.0);
+    vNormal = normal;
     vPosition = position;
 
     vColor = color;

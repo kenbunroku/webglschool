@@ -13,14 +13,14 @@ uniform float outerLimit;
 uniform mat4 normalMatrix;
 
 varying vec4 vColor;
-varying vec4 vNormal;
+varying vec3 vNormal;
 varying vec3 vPosition;
 
 // Directional light vector
 const vec3 light = vec3(1.0, 1.0, 1.0);
 
 void main() {
-    vec3 n = (normalMatrix * vNormal).xyz;
+    vec3 n = (normalMatrix * vec4(vNormal, 0.0)).xyz;
     float d = dot(normalize(n), normalize(light));
 
     vec3 pointLightDirection = pointLightPosition1 - vPosition;
