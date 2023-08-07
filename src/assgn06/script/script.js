@@ -39,23 +39,22 @@ class App {
     this.startTime = null;
     this.camera = null;
     this.isRender = false;
-    this.isRotation = false;
+    this.isTorusRotation = false;
 
     this.isDirectionalLight = true;
     this.directionalLightColor = [1.0, 1.0, 1.0];
     this.intensity = 0.5;
 
     this.isPointLight1 = false;
-    this.pointLightPosition1 = { x: 1.0, y: 1.0, z: 1.0 };
+    this.isPointLightRotation1 = false;
     this.pointLightColor1 = [1.0, 0.0, 0.0];
 
     this.isSpotLight = false;
+    this.isSpotLightTargetRotation = false;
     this.spotLightPosition = { x: 0.0, y: 2.0, z: 0.0 };
     this.spotLightColor = [0.0, 0.0, 1.0];
     this.innerLimit = 10.0;
     this.outerLimit = 20.0;
-
-    this.isRotation = false;
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -82,7 +81,7 @@ class App {
   }
 
   setRotation(flag) {
-    this.isRotation = flag;
+    this.isTorusRotation = flag;
   }
 
   init() {
@@ -108,7 +107,7 @@ class App {
 
     // gui
     const gui = new dat.GUI();
-    gui.add(this, "isRotation").name("Rotation");
+    gui.add(this, "isTorusRotation").name("Rotation");
     const directionalLightFolder = gui.addFolder("Directional Light");
     directionalLightFolder
       .add(this, "isDirectionalLight")
@@ -130,13 +129,11 @@ class App {
 
     const pointLightFolder = gui.addFolder("Point Light");
     pointLightFolder.add(this, "isPointLight1").name("On/Off");
-
-    pointLightFolder.add(this.pointLightPosition1, "x", -1, 1);
-    pointLightFolder.add(this.pointLightPosition1, "y", -1, 1);
-    pointLightFolder.add(this.pointLightPosition1, "z", -1, 1);
+    pointLightFolder.add(this, "isPointLightRotation1").name("Rotation");
 
     const spotLightFolder = gui.addFolder("Spot Light");
     spotLightFolder.add(this, "isSpotLight").name("On/Off");
+    spotLightFolder.add(this, "isSpotLightTargetRotation").name("Rotation");
     spotLightFolder.add(this.spotLightPosition, "x", -1, 1);
     spotLightFolder.add(this.spotLightPosition, "y", -1, 5);
     spotLightFolder.add(this.spotLightPosition, "z", -1, 1);
@@ -194,29 +191,6 @@ class App {
       WebGLUtility.createVBO(this.gl, this.torusGeometry.color),
     ];
     this.torusIBO = WebGLUtility.createIBO(this.gl, this.torusGeometry.index);
-
-    // Get sphere parameters
-    const latitude = 32;
-    const longitude = 32;
-    const radius = 0.05;
-    const color2 = [1.0, 0.0, 0.0, 1.0];
-    this.sphereGeometry = WebGLGeometry.sphere(
-      latitude,
-      longitude,
-      radius,
-      color2
-    );
-
-    for (let i = 0; i < this.sphereGeometry.position.length; i++) {
-      this.sphereGeometry.position[i] += 2.0;
-    }
-    // Generate VBO and IBO
-    this.sphereVBO = [
-      WebGLUtility.createVBO(this.gl, this.sphereGeometry.position),
-      WebGLUtility.createVBO(this.gl, this.sphereGeometry.normal),
-      WebGLUtility.createVBO(this.gl, this.sphereGeometry.color),
-    ];
-    this.sphereIBO = WebGLUtility.createIBO(this.gl, this.sphereGeometry.index);
   }
 
   setupLocation() {
@@ -307,7 +281,7 @@ class App {
     // Rotation
     const rotateAxis = v3.create(0.0, 1.0, 0.0);
     const m =
-      this.isRotation === true
+      this.isTorusRotation === true
         ? m4.rotate(m4.identity(), nowTime, rotateAxis)
         : m4.identity();
 
@@ -327,23 +301,17 @@ class App {
     const normalMatrix = m4.transpose(m4.inverse(m));
 
     // Light position
-    const pointLightPosition1 = v3.create(
-      this.pointLightPosition1.x,
-      this.pointLightPosition1.y,
-      this.pointLightPosition1.z
-    );
-    const pointLightPosition2 = v3.create(-1.0, 1.0, 1.0);
+    const pointLightPosition1 = this.isPointLightRotation1
+      ? v3.create(Math.sin(nowTime) * 2, Math.cos(nowTime) * 2, 1.0)
+      : v3.create(2.0, 2.0, 1.0);
     const spotLightPosition = v3.create(
       this.spotLightPosition.x,
       this.spotLightPosition.y,
       this.spotLightPosition.z
     );
-
-    const spotLightTarget = v3.create(
-      Math.cos(nowTime),
-      0.0,
-      Math.sin(nowTime)
-    );
+    const spotLightTarget = this.isSpotLightTargetRotation
+      ? v3.create(Math.cos(nowTime), 0.0, Math.sin(nowTime))
+      : v3.create(1.0, 0.0, 0.0);
 
     const innerRadians = (this.innerLimit * Math.PI) / 180.0;
     const outerRadians = (this.outerLimit * Math.PI) / 180.0;
@@ -359,10 +327,6 @@ class App {
     gl.uniform3fv(
       this.uniformLocation.pointLightPosition1,
       pointLightPosition1
-    );
-    gl.uniform3fv(
-      this.uniformLocation.pointLightPosition2,
-      pointLightPosition2
     );
     gl.uniform3fv(this.uniformLocation.spotLightPosition, spotLightPosition);
     gl.uniform3fv(this.uniformLocation.spotLightTarget, spotLightTarget);
@@ -386,21 +350,6 @@ class App {
     gl.drawElements(
       gl.TRIANGLES,
       this.torusGeometry.index.length,
-      gl.UNSIGNED_SHORT,
-      0
-    );
-
-    // Set up VBO and IBO and draw
-    WebGLUtility.enableBuffer(
-      gl,
-      this.sphereVBO,
-      this.attributeLocation,
-      this.attributeStride,
-      this.sphereIBO
-    );
-    gl.drawElements(
-      gl.TRIANGLES,
-      this.sphereGeometry.index.length,
       gl.UNSIGNED_SHORT,
       0
     );
