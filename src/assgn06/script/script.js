@@ -236,6 +236,10 @@ class App {
     this.uniformLocation = {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
+      isDirectionalLight: gl.getUniformLocation(
+        this.program,
+        "this.isDirectionalLight"
+      ),
       pointLightPosition1: gl.getUniformLocation(
         this.program,
         "pointLightPosition1"
@@ -344,10 +348,13 @@ class App {
     const innerRadians = (this.innerLimit * Math.PI) / 180.0;
     const outerRadians = (this.outerLimit * Math.PI) / 180.0;
 
+    const isDirectionalLight = this.isDirectionalLight ? 1.0 : 0.0;
+
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
+    gl.uniform1f(this.uniformLocation.isDirectionalLight, isDirectionalLight);
     gl.uniform1f(this.uniformLocation.intensity, this.intensity);
     gl.uniform3fv(
       this.uniformLocation.pointLightPosition1,
