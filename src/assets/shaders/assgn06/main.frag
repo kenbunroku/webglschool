@@ -28,10 +28,8 @@ void main() {
     vec3 spotLightDirection = spotLightPosition - vPosition;
     vec3 spotDirection = spotLightTarget - spotLightPosition;
     float spotEffect = dot(normalize(spotLightDirection), normalize(-spotDirection));
-    float sd = 0.0;
-    if(spotEffect >= coneAngle) {
-        sd = clamp(dot(normalize(n), normalize(spotLightDirection)), 0.0, 1.0);
-    }
+    float inLight = step(coneAngle, spotEffect);
+    float sd = inLight * clamp(dot(normalize(n), normalize(spotLightDirection)), 0.0, 1.0);
 
     vec3 ambient = vec3(0.1, 0.1, 0.1);
 
