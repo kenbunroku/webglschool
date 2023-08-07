@@ -75,7 +75,8 @@ class App {
     this.spotLightPosition = { x: 1.0, y: 2.0, z: 0.0 };
     this.spotLightTarget = { x: 0.0, y: 0.0, z: 0.0 };
     this.spotLightColor = [0.0, 0.0, 0.0];
-    this.coneAngle = 30.0;
+    this.innerLimit = 10.0;
+    this.outerLimit = 20.0;
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -162,7 +163,8 @@ class App {
     spotLightFolder.add(this.spotLightPosition, "x", -1, 1);
     spotLightFolder.add(this.spotLightPosition, "y", -1, 5);
     spotLightFolder.add(this.spotLightPosition, "z", -1, 1);
-    spotLightFolder.add(this, "coneAngle", 1, 90);
+    spotLightFolder.add(this, "innerLimit", 1, 90);
+    spotLightFolder.add(this, "outerLimit", 1, 90);
   }
 
   resize() {
@@ -276,7 +278,8 @@ class App {
       ),
       pointLightColor1: gl.getUniformLocation(this.program, "pointLightColor1"),
       spotLightColor: gl.getUniformLocation(this.program, "spotLightColor"),
-      coneAngle: gl.getUniformLocation(this.program, "coneAngle"),
+      innerLimit: gl.getUniformLocation(this.program, "innerLimit"),
+      outerLimit: gl.getUniformLocation(this.program, "outerLimit"),
     };
   }
 
@@ -360,7 +363,8 @@ class App {
       this.spotLightTarget.z
     );
 
-    const radians = (this.coneAngle * Math.PI) / 180.0;
+    const innerRadians = (this.innerLimit * Math.PI) / 180.0;
+    const outerRadians = (this.outerLimit * Math.PI) / 180.0;
 
     // Update uniform variables
     gl.useProgram(this.program);
@@ -383,7 +387,8 @@ class App {
     );
     gl.uniform3fv(this.uniformLocation.pointLightColor1, this.pointLightColor1);
     gl.uniform3fv(this.uniformLocation.spotLightColor, this.spotLightColor);
-    gl.uniform1f(this.uniformLocation.coneAngle, Math.cos(radians));
+    gl.uniform1f(this.uniformLocation.innerLimit, Math.cos(innerRadians));
+    gl.uniform1f(this.uniformLocation.outerLimit, Math.cos(outerRadians));
 
     // Set up VBO and IBO and draw
     WebGLUtility.enableBuffer(
