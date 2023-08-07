@@ -64,13 +64,17 @@ class App {
     this.isRotation = false;
 
     this.isDirectionalLight = true;
-    this.lightColor = [1.0, 1.0, 1.0];
+    this.directionalLightColor = [1.0, 1.0, 1.0];
     this.intensity = 0.5;
 
     this.isPointLight1 = false;
-    this.lightColor2 = [0.0, 0.0, 0.0];
-    this.isPointLight2 = false;
-    this.lightColor3 = [0.0, 0.0, 0.0];
+    this.pointLightColor1 = [0.0, 0.0, 0.0];
+    this.isPointLight2 = true;
+    this.pointLightColor2 = [0.0, 0.0, 0.0];
+
+    this.pointLightPosition1 = { x: 1.0, y: 1.0, z: 1.0 };
+    this.spotLightPosition = { x: 1.0, y: 2.0, z: 0.0 };
+    this.spotLightTarget = { x: 0.0, y: 0.0, z: 0.0 };
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -130,7 +134,7 @@ class App {
       .onChange((value) => {
         !value ? (this.intensity = 0.0) : (this.intensity = 0.5);
       });
-    directionalLightFolder.addColor(this, "lightColor").name("Color");
+    directionalLightFolder.addColor(this, "directionalLightColor").name("Color");
     directionalLightFolder
       .add(this, "intensity", 0.0, 1.0)
       .name("Intensity")
@@ -141,22 +145,19 @@ class App {
       });
 
     const pointLightFolder = gui.addFolder("Point Light");
-    pointLightFolder
-      .add(this, "isPointLight1")
-      .name("Point Light 1")
-      .onChange(() => {
-        this.isPointLight1
-          ? (this.lightColor2 = [1.0, 0.0, 0.0])
-          : (this.lightColor2 = [0.0, 0.0, 0.0]);
-      });
-    pointLightFolder
-      .add(this, "isPointLight2")
-      .name("Point Light 2")
-      .onChange(() => {
-        this.isPointLight2
-          ? (this.lightColor3 = [0.0, 1.0, 0.0])
-          : (this.lightColor3 = [0.0, 0.0, 0.0]);
-      });
+    pointLightFolder.add(this, "isPointLight1").name("Point Light 1");
+    pointLightFolder.add(this, "isPointLight2").name("Point Light 2");
+    pointLightFolder.add(this.pointLightPosition1, "x", -1, 1).name("x");
+    pointLightFolder.add(this.pointLightPosition1, "y", -1, 1).name("x");
+    pointLightFolder.add(this.pointLightPosition1, "z", -1, 1).name("x");
+
+    const spotLightFolder = gui.addFolder("Spot Light Target");
+    spotLightFolder.add(this.spotLightTarget, "x", -1, 1).name("Target x");
+    spotLightFolder.add(this.spotLightTarget, "y", -1, 1).name("Target y");
+    spotLightFolder.add(this.spotLightTarget, "z", -1, 1).name("Target z");
+    spotLightFolder.add(this.spotLightPosition, "x", -1, 1).name("x");
+    spotLightFolder.add(this.spotLightPosition, "y", -1, 1).name("y");
+    spotLightFolder.add(this.spotLightPosition, "z", -1, 1).name("z");
   }
 
   resize() {
@@ -259,9 +260,17 @@ class App {
         this.program,
         "pointLightPosition2"
       ),
-      lightColor: gl.getUniformLocation(this.program, "lightColor"),
-      lightColor2: gl.getUniformLocation(this.program, "lightColor2"),
-      lightColor3: gl.getUniformLocation(this.program, "lightColor3"),
+      spotLightPosition: gl.getUniformLocation(
+        this.program,
+        "spotLightPosition"
+      ),
+      spotLightTarget: gl.getUniformLocation(this.program, "spotLightTarget"),
+      directionalLightColor: gl.getUniformLocation(
+        this.program,
+        "directionalLightColor"
+      ),
+      pointLightColor1: gl.getUniformLocation(this.program, "pointLightColor1"),
+      pointLightColor2: gl.getUniformLocation(this.program, "pointLightColor2"),
     };
   }
 
@@ -289,6 +298,14 @@ class App {
     const v3 = WebGLMath.Vec3;
 
     if (this.isRender === true) requestAnimationFrame(this.render);
+
+    this.isPointLight1
+      ? (this.pointLightColor1 = [1.0, 0.0, 0.0])
+      : (this.pointLightColor1 = [0.0, 0.0, 0.0]);
+
+    this.isPointLight2
+      ? (this.pointLightColor2 = [0.0, 1.0, 0.0])
+      : (this.pointLightColor2 = [0.0, 0.0, 0.0]);
 
     // Delta time
     const nowTime = (Date.now() - this.startTime) * 0.001;
@@ -319,23 +336,45 @@ class App {
     const normalMatrix = m4.transpose(m4.inverse(m));
 
     // Light position
-    const pointLightPosition1 = v3.create(1.0, 1.0, 1.0);
+    const pointLightPosition1 = v3.create(
+      this.pointLightPosition1.x,
+      this.pointLightPosition1.y,
+      this.pointLightPosition1.z
+    );
     const pointLightPosition2 = v3.create(-1.0, 1.0, 1.0);
-    const spotLightPosition = v3.create(-1.0, 1.0, 1.0);
+    const spotLightPosition = v3.create(
+      this.spotLightPosition.x,
+      this.spotLightPosition.y,
+      this.spotLightPosition.z
+    );
 
-    // Light target
-    const spotLightTarget = v3.create(0.0, 0.0, 0.0);
+    const spotLightTarget = v3.create(
+      this.spotLightTarget.x,
+      this.spotLightTarget.y,
+      this.spotLightTarget.z
+    );
 
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
     gl.uniform1f(this.uniformLocation.intensity, this.intensity);
-    gl.uniform3fv(this.uniformLocation.pointLightPosition1, pointLightPosition1);
-    gl.uniform3fv(this.uniformLocation.pointLightPosition2, pointLightPosition2);
-    gl.uniform3fv(this.uniformLocation.lightColor, this.lightColor);
-    gl.uniform3fv(this.uniformLocation.lightColor2, this.lightColor2);
-    gl.uniform3fv(this.uniformLocation.lightColor3, this.lightColor3);
+    gl.uniform3fv(
+      this.uniformLocation.pointLightPosition1,
+      pointLightPosition1
+    );
+    gl.uniform3fv(
+      this.uniformLocation.pointLightPosition2,
+      pointLightPosition2
+    );
+    gl.uniform3fv(this.uniformLocation.spotLightPosition, spotLightPosition);
+    gl.uniform3fv(this.uniformLocation.spotLightTarget, spotLightTarget);
+    gl.uniform3fv(
+      this.uniformLocation.directionalLightColor,
+      this.directionalLightColor
+    );
+    gl.uniform3fv(this.uniformLocation.pointLightColor1, this.pointLightColor1);
+    gl.uniform3fv(this.uniformLocation.pointLightColor2, this.pointLightColor2);
 
     // Set up VBO and IBO and draw
     WebGLUtility.enableBuffer(
