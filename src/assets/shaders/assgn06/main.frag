@@ -2,12 +2,13 @@ precision mediump float;
 
 uniform float intensity;
 uniform vec3 pointLightPosition1;
-uniform vec3 pointLightPosition2;
-uniform vec3 spotLightPosition;
-uniform vec3 spotLightTarget;
+
 uniform vec3 directionalLightColor;
 uniform vec3 pointLightColor1;
+uniform vec3 spotLightPosition;
+uniform vec3 spotLightTarget;
 uniform vec3 spotLightColor;
+uniform float coneAngle;
 uniform mat4 normalMatrix;
 
 varying vec4 vColor;
@@ -28,7 +29,7 @@ void main() {
     vec3 spotDirection = spotLightTarget - spotLightPosition;
     float spotEffect = dot(normalize(spotLightDirection), normalize(-spotDirection));
     float sd = 0.0;
-    if(spotEffect >= .93) {
+    if(spotEffect >= coneAngle) {
         sd = clamp(dot(normalize(n), normalize(spotLightDirection)), 0.0, 1.0);
     }
 
