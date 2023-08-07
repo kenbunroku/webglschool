@@ -69,14 +69,15 @@ class App {
 
     this.isPointLight1 = false;
     this.pointLightPosition1 = { x: 1.0, y: 1.0, z: 1.0 };
-    this.pointLightColor1 = [0.0, 0.0, 0.0];
+    this.pointLightColor1 = [1.0, 0.0, 0.0];
 
-    this.isSpotLight = true;
-    this.spotLightPosition = { x: 1.0, y: 2.0, z: 0.0 };
-    this.spotLightTarget = { x: 0.0, y: 0.0, z: 0.0 };
-    this.spotLightColor = [0.0, 0.0, 0.0];
+    this.isSpotLight = false;
+    this.spotLightPosition = { x: 0.0, y: 2.0, z: 0.0 };
+    this.spotLightColor = [0.0, 0.0, 1.0];
     this.innerLimit = 10.0;
     this.outerLimit = 20.0;
+
+    this.isRotation = false;
 
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
@@ -129,6 +130,7 @@ class App {
 
     // gui
     const gui = new dat.GUI();
+    gui.add(this, "isRotation").name("Rotation");
     const directionalLightFolder = gui.addFolder("Directional Light");
     directionalLightFolder
       .add(this, "isDirectionalLight")
@@ -157,9 +159,6 @@ class App {
 
     const spotLightFolder = gui.addFolder("Spot Light");
     spotLightFolder.add(this, "isSpotLight").name("On/Off");
-    spotLightFolder.add(this.spotLightTarget, "x", -1, 1).name("Target x");
-    spotLightFolder.add(this.spotLightTarget, "y", -1, 1).name("Target y");
-    spotLightFolder.add(this.spotLightTarget, "z", -1, 1).name("Target z");
     spotLightFolder.add(this.spotLightPosition, "x", -1, 1);
     spotLightFolder.add(this.spotLightPosition, "y", -1, 5);
     spotLightFolder.add(this.spotLightPosition, "z", -1, 1);
@@ -229,6 +228,7 @@ class App {
       radius,
       color2
     );
+
     for (let i = 0; i < this.sphereGeometry.position.length; i++) {
       this.sphereGeometry.position[i] += 2.0;
     }
@@ -313,7 +313,7 @@ class App {
       : (this.pointLightColor1 = [0.0, 0.0, 0.0]);
 
     this.isSpotLight
-      ? (this.spotLightColor = [0.0, 1.0, 0.0])
+      ? (this.spotLightColor = [0.0, 0.0, 1.0])
       : (this.spotLightColor = [0.0, 0.0, 0.0]);
 
     // Delta time
@@ -358,9 +358,9 @@ class App {
     );
 
     const spotLightTarget = v3.create(
-      this.spotLightTarget.x,
-      this.spotLightTarget.y,
-      this.spotLightTarget.z
+      Math.cos(nowTime),
+      0.0,
+      Math.sin(nowTime)
     );
 
     const innerRadians = (this.innerLimit * Math.PI) / 180.0;
