@@ -134,9 +134,6 @@ class App {
     const spotLightFolder = gui.addFolder("Spot Light");
     spotLightFolder.add(this, "isSpotLight").name("On/Off");
     spotLightFolder.add(this, "isSpotLightTargetRotation").name("Rotation");
-    spotLightFolder.add(this.spotLightPosition, "x", -1, 1);
-    spotLightFolder.add(this.spotLightPosition, "y", -1, 5);
-    spotLightFolder.add(this.spotLightPosition, "z", -1, 1);
     spotLightFolder.add(this, "innerLimit", 1, 90);
     spotLightFolder.add(this, "outerLimit", 1, 90);
   }
