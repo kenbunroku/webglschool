@@ -210,7 +210,7 @@ class App {
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
       isDirectionalLight: gl.getUniformLocation(
         this.program,
-        "this.isDirectionalLight"
+        "isDirectionalLight"
       ),
       pointLightPosition1: gl.getUniformLocation(
         this.program,
