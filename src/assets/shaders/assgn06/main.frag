@@ -1,10 +1,9 @@
 precision mediump float;
 
 uniform float intensity;
-uniform vec3 pointLightPosition1;
-
 uniform float isDirectionalLight;
 uniform vec3 directionalLightColor;
+uniform vec3 pointLightPosition1;
 uniform vec3 pointLightColor1;
 uniform vec3 spotLightPosition;
 uniform vec3 spotLightTarget;
@@ -33,8 +32,7 @@ void main() {
     float inLight = smoothstep(outerLimit, innerLimit, spotEffect);
     float sd = inLight * clamp(dot(normalize(n), normalize(spotLightDirection)), 0.0, 1.0);
 
-    float isAmbient = step(1.0, isDirectionalLight);
-    vec3 ambient = isAmbient * vec3(0.1, 0.1, 0.1);
+    vec3 ambient = isDirectionalLight * vec3(0.1, 0.1, 0.1);
 
     vec3 combinedLight = d * directionalLightColor * intensity + pd * pointLightColor1 + sd * spotLightColor + ambient;
 
