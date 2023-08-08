@@ -205,6 +205,7 @@ class App {
 
     // Get uniform location
     this.uniformLocation = {
+      mMatrix: gl.getUniformLocation(this.program, "mMatrix"),
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
       isDirectionalLight: gl.getUniformLocation(
@@ -300,7 +301,7 @@ class App {
     // Light position
     const pointLightPosition1 = this.isPointLightRotation1
       ? v3.create(Math.sin(nowTime) * 2, Math.cos(nowTime) * 2, 1.0)
-      : v3.create(2.0, 2.0, 1.0);
+      : v3.create(3.0, 2.0, 1.0);
     const spotLightPosition = v3.create(
       this.spotLightPosition.x,
       this.spotLightPosition.y,
@@ -318,6 +319,7 @@ class App {
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
+    gl.uniformMatrix4fv(this.uniformLocation.mMatrix, false, m);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
     gl.uniform1f(this.uniformLocation.isDirectionalLight, isDirectionalLight);
     gl.uniform1f(this.uniformLocation.intensity, this.intensity);
