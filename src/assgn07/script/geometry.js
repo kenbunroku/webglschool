@@ -697,12 +697,16 @@ export class WebGLGeometry {
     return { position: pos, normal: nor, color: col, texCoord: st, index: idx };
   }
 
-  static icosphere(order = 0) {
+  static icosphere(order = 0, color) {
     // set up a 20-triangle icosahedron
     const f = (1 + Math.sqrt(5)) / 2;
     const T = 4 ** order;
 
     const vertices = new Float32Array((10 * T + 2) * 3);
+    const normals = new Float32Array(vertices.length);
+    const uvs = new Float32Array((10 * T + 2) * 2);
+    const colors = new Float32Array((10 * T + 2) * 4);
+
     vertices.set(
       Float32Array.of(
         -1,
@@ -810,12 +814,13 @@ export class WebGLGeometry {
     const midCashe = order ? new Map() : null; // midpoint vertices cache to avoid duplicating shared vertices
 
     function addMidPoint(a, b) {
-      const key = Math.floor(((a + b) * (a + b + 1)) / 2 + Math.min(a, b));
+      const key = Math.floor(((a + b) * (a + b + 1)) / 2) + Math.min(a, b);
       let i = midCashe.get(key);
       if (i !== undefined) {
         midCashe.delete(key);
         return i;
       }
+      midCashe.set(key, v);
       for (let k = 0; k < 3; k++)
         vertices[3 * v + k] = (vertices[a * 3 + k] + vertices[b * 3 + k]) / 2;
       i = v++;
@@ -856,7 +861,33 @@ export class WebGLGeometry {
       vertices[i + 0] *= m;
       vertices[i + 1] *= m;
       vertices[i + 2] *= m;
+
+      // Set normals
+      normals[i + 0] = vertices[i + 0];
+      normals[i + 1] = vertices[i + 1];
+      normals[i + 2] = vertices[i + 2];
+
+      // Cmpute UVs using spherical coorinates
+      const u = 0.5 + Math.atan2(vertices[i + 2], vertices[i + 0]) / Math.PI;
+      const v = 0.5 - Math.asin(vertices[i + 1]) / Math.PI;
+      uvs[(i / 3) * 2 + 0] = u;
+      uvs[(i / 3) * 2 + 1] = v;
     }
-    return { position: vertices, index: triangles };
+
+    // Set colors
+    for (let i = 0; i < colors.length; i += 4) {
+      colors[i + 0] = color[0];
+      colors[i + 1] = color[1];
+      colors[i + 2] = color[2];
+      colors[i + 3] = color[3];
+    }
+
+    return {
+      position: vertices,
+      normal: normals,
+      color: colors,
+      textCoord: uvs,
+      index: triangles,
+    };
   }
 }
