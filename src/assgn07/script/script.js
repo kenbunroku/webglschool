@@ -77,6 +77,10 @@ class App {
      */
     this.planeIBO = null;
 
+    this.icosphereGeometry = null;
+    this.icosphereVBO = null;
+    this.icosphereIBO = null;
+
     /** Time stamp of start time
      *    @type {number}
      */
@@ -214,6 +218,22 @@ class App {
       WebGLUtility.createVBO(this.gl, this.planeGeometry.texCoord),
     ];
     this.planeIBO = WebGLUtility.createIBO(this.gl, this.planeGeometry.index);
+
+    // Create isosphere geometry
+    const order = 3;
+    this.icosphereGeometry = WebGLGeometry.icosphere(order, color);
+
+    // Create VBO and IBO\
+    this.icosphereVBO = [
+      WebGLUtility.createVBO(this.gl, this.icosphereGeometry.position),
+      WebGLUtility.createVBO(this.gl, this.icosphereGeometry.normal),
+      WebGLUtility.createVBO(this.gl, this.icosphereGeometry.color),
+      WebGLUtility.createVBO(this.gl, this.icosphereGeometry.texCoord),
+    ];
+    this.icosphereIBO = WebGLUtility.createIBO(
+      this.gl,
+      this.icosphereGeometry.index
+    );
   }
 
   /** Set up Attribute Location */
@@ -313,17 +333,32 @@ class App {
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
     gl.uniform1i(this.uniformLocation.textureUnit, 0);
 
+    // // Set VBO and IBO and draw geometry
+    // WebGLUtility.enableBuffer(
+    //   gl,
+    //   this.planeVBO,
+    //   this.attributeLocation,
+    //   this.attributeStride,
+    //   this.planeIBO
+    // );
+    // gl.drawElements(
+    //   gl.TRIANGLES,
+    //   this.planeGeometry.index.length,
+    //   gl.UNSIGNED_SHORT,
+    //   0
+    // );
+
     // Set VBO and IBO and draw geometry
     WebGLUtility.enableBuffer(
       gl,
-      this.planeVBO,
+      this.icosphereVBO,
       this.attributeLocation,
       this.attributeStride,
-      this.planeIBO
+      this.icosphereIBO
     );
     gl.drawElements(
       gl.TRIANGLES,
-      this.planeGeometry.index.length,
+      this.icosphereGeometry.index.length,
       gl.UNSIGNED_SHORT,
       0
     );
