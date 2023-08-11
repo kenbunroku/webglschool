@@ -6,5 +6,7 @@ varying vec4 vColor;
 varying vec2 vTexCoord;
 
 void main() {
-    gl_FragColor = vColor * texture2D(textureUnit, vTexCoord);
+    vec4 diffuseColor = texture2D(textureUnit, vTexCoord);
+
+    gl_FragColor = vColor * diffuseColor;
 }

@@ -26,7 +26,7 @@ window.addEventListener(
 
     // Turn on/off texture
     pane.addInput(parameter, "texture").on("change", (event) => {
-      app.setTexture(event.value);
+      app.setTextureVisibility(event.value);
     });
   },
   false
@@ -195,7 +195,7 @@ class App {
         );
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
 
-        WebGLUtility.loadImage("/img/sample.jpg").then((image) => {
+        WebGLUtility.loadImage("/img/blue-marble.jpg").then((image) => {
           this.texture = WebGLUtility.createTexture(gl, image);
           resolve();
         });
@@ -205,23 +205,10 @@ class App {
 
   /** Set up geometry */
   setupGeometry() {
-    // Create plane geometry
-    const size = 2.0;
-    const color = [1.0, 1.0, 1.0, 1.0];
-    this.planeGeometry = WebGLGeometry.plane(size, size, color);
-
-    // Create VBO and IBO
-    this.planeVBO = [
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.position),
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.normal),
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.color),
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.texCoord),
-    ];
-    this.planeIBO = WebGLUtility.createIBO(this.gl, this.planeGeometry.index);
-
     // Create isosphere geometry
-    const order = 3;
-    this.icosphereGeometry = WebGLGeometry.icosphere(order, color);
+    const order = 4;
+    const color = [1.0, 1.0, 1.0, 1.0];
+    this.icosphereGeometry = WebGLGeometry.icosphere(order, color, true);
 
     // Create VBO and IBO\
     this.icosphereVBO = [
@@ -234,6 +221,7 @@ class App {
       this.gl,
       this.icosphereGeometry.index
     );
+    console.log(this.icosphereGeometry)
   }
 
   /** Set up Attribute Location */
@@ -264,7 +252,7 @@ class App {
     const gl = this.gl;
 
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    gl.clearColor(0.3, 0.3, 0.3, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
@@ -331,22 +319,7 @@ class App {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
-    gl.uniform1i(this.uniformLocation.textureUnit, 0);
-
-    // // Set VBO and IBO and draw geometry
-    // WebGLUtility.enableBuffer(
-    //   gl,
-    //   this.planeVBO,
-    //   this.attributeLocation,
-    //   this.attributeStride,
-    //   this.planeIBO
-    // );
-    // gl.drawElements(
-    //   gl.TRIANGLES,
-    //   this.planeGeometry.index.length,
-    //   gl.UNSIGNED_SHORT,
-    //   0
-    // );
+    gl.uniform1i(this.uniformLocation.textureUnit, this.texture);
 
     // Set VBO and IBO and draw geometry
     WebGLUtility.enableBuffer(
