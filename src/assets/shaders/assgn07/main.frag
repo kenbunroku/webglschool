@@ -8,5 +8,5 @@ varying vec2 vTexCoord;
 void main() {
     vec4 diffuseColor = texture2D(textureUnit, vTexCoord);
 
-    gl_FragColor = vColor * diffuseColor;
+    gl_FragColor =  diffuseColor;
 }
