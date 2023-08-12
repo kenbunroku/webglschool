@@ -713,7 +713,7 @@ export class WebGLGeometry {
 
     const vertices = new Float32Array((numVertices + numDuplicates) * 3);
     const normals = new Float32Array(vertices.length);
-    const colors = new Float32Array(numVertices * 4);
+    const colors = new Float32Array((numVertices + numDuplicates) * 4);
 
     vertices.set(
       Float32Array.of(
@@ -881,12 +881,13 @@ export class WebGLGeometry {
       normals[i + 0] = vertices[i + 0];
       normals[i + 1] = vertices[i + 1];
       normals[i + 2] = vertices[i + 2];
+    }
 
-      // Set colors
-      colors[(i / 3) * 4 + 0] = color[0];
-      colors[(i / 3) * 4 + 1] = color[1];
-      colors[(i / 3) * 4 + 2] = color[2];
-      colors[(i / 3) * 4 + 3] = color[3];
+    for (let i = 0; i < numVertices * 4; i += 4) {
+      colors[i + 0] = color[0];
+      colors[i + 1] = 1;
+      colors[i + 2] = 1;
+      colors[i + 3] = 1;
     }
 
     if (!uvMap)
@@ -915,6 +916,10 @@ export class WebGLGeometry {
       vertices[3 * v + 0] = vertices[3 * i + 0];
       vertices[3 * v + 1] = vertices[3 * i + 1];
       vertices[3 * v + 2] = vertices[3 * i + 2];
+      colors[4 * v + 0] = colors[4 * i + 0];
+      colors[4 * v + 1] = colors[4 * i + 1];
+      colors[4 * v + 2] = colors[4 * i + 2];
+      colors[4 * v + 3] = colors[4 * i + 3];
       uv[2 * v + 0] = uvx;
       uv[2 * v + 1] = uvy;
       if (cached) duplicates.set(i, v);
@@ -940,6 +945,7 @@ export class WebGLGeometry {
 
       if (ay === 0 || ay === 1) {
         ax = (bx + cx) / 2;
+
         if (ay === bx) uv[2 * a] = ax;
         else triangles[i + 0] = addDuplicate(a, ax, ay, false);
       } else if (by === 0 || by === 1) {
@@ -958,6 +964,9 @@ export class WebGLGeometry {
       if (cx !== uv[2 * c] && cy !== 0 && cy !== 1)
         triangles[i + 2] = addDuplicate(c, cx, cy, true);
     }
+
+    // flip v in uv
+    for (let i = 0; i < uv.length; i += 2) uv[i + 1] = 1 - uv[i + 1];
 
     return {
       position: vertices,
