@@ -319,7 +319,7 @@ class App {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
-    gl.uniform1i(this.uniformLocation.textureUnit, this.texture);
+    gl.uniform1i(this.uniformLocation.textureUnit, 0);
 
     // Set VBO and IBO and draw geometry
     WebGLUtility.enableBuffer(
