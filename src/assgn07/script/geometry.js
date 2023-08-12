@@ -697,15 +697,23 @@ export class WebGLGeometry {
     return { position: pos, normal: nor, color: col, texCoord: st, index: idx };
   }
 
-  static icosphere(order = 0, color) {
+  static icosphere(order = 0, color = [1.0, 1.0, 1.0, 1.0], uvMap = false) {
+    if (order > 10) throw new Error(`Max order is 10, but given ${order}.`);
+
     // set up a 20-triangle icosahedron
     const f = (1 + Math.sqrt(5)) / 2;
-    const T = 4 ** order;
+    const T = Math.pow(4, order);
 
-    const vertices = new Float32Array((10 * T + 2) * 3);
+    const numVertices = 10 * T + 2;
+    const numDuplicates = !uvMap
+      ? 0
+      : order === 0
+      ? 3
+      : Math.pow(2, order) * 3 + 9;
+
+    const vertices = new Float32Array((numVertices + numDuplicates) * 3);
     const normals = new Float32Array(vertices.length);
-    const uvs = new Float32Array((10 * T + 2) * 2);
-    const colors = new Float32Array((10 * T + 2) * 4);
+    const colors = new Float32Array(numVertices * 4);
 
     vertices.set(
       Float32Array.of(
@@ -814,23 +822,27 @@ export class WebGLGeometry {
     const midCashe = order ? new Map() : null; // midpoint vertices cache to avoid duplicating shared vertices
 
     function addMidPoint(a, b) {
-      const key = Math.floor(((a + b) * (a + b + 1)) / 2) + Math.min(a, b);
+      const key = Math.floor(((a + b) * (a + b + 1)) / 2 + Math.min(a, b));
       let i = midCashe.get(key);
       if (i !== undefined) {
         midCashe.delete(key);
         return i;
       }
       midCashe.set(key, v);
-      for (let k = 0; k < 3; k++)
-        vertices[3 * v + k] = (vertices[a * 3 + k] + vertices[b * 3 + k]) / 2;
-      i = v++;
-      return i;
+      vertices[3 * v + 0] = (vertices[3 * a + 0] + vertices[3 * b + 0]) * 0.5;
+      vertices[3 * v + 1] = (vertices[3 * a + 1] + vertices[3 * b + 1]) * 0.5;
+      vertices[3 * v + 2] = (vertices[3 * a + 2] + vertices[3 * b + 2]) * 0.5;
+      return v++;
     }
 
     let trianglesPrev = triangles;
+    const IndexArray = order > 5 ? Uint32Array : Uint16Array;
+
     for (let i = 0; i < order; i++) {
-      triangles = new Uint32Array(trianglesPrev.length * 4);
-      for (let k = 0; k < trianglesPrev.length; k += 3) {
+      const prevLen = trianglesPrev.length;
+      triangles = new IndexArray(prevLen * 4);
+
+      for (let k = 0; k < prevLen; k += 3) {
         const v1 = trianglesPrev[k + 0];
         const v2 = trianglesPrev[k + 1];
         const v3 = trianglesPrev[k + 2];
@@ -855,9 +867,12 @@ export class WebGLGeometry {
     }
 
     // normalize vertices
-    for (let i = 0; i < vertices.length; i += 3) {
-      const m =
-        1 / Math.hypot(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
+    for (let i = 0; i < numVertices * 3; i += 3) {
+      const x = vertices[i + 0];
+      const y = vertices[i + 1];
+      const z = vertices[i + 2];
+
+      const m = 1 / Math.hypot(x, y, z);
       vertices[i + 0] *= m;
       vertices[i + 1] *= m;
       vertices[i + 2] *= m;
@@ -867,26 +882,88 @@ export class WebGLGeometry {
       normals[i + 1] = vertices[i + 1];
       normals[i + 2] = vertices[i + 2];
 
-      // Cmpute UVs using spherical coorinates
-      const u = 0.5 + Math.atan2(vertices[i + 2], vertices[i + 0]) / Math.PI;
-      const v = 0.5 - Math.asin(vertices[i + 1]) / Math.PI;
-      uvs[(i / 3) * 2 + 0] = u;
-      uvs[(i / 3) * 2 + 1] = v;
+      // Set colors
+      colors[(i / 3) * 4 + 0] = color[0];
+      colors[(i / 3) * 4 + 1] = color[1];
+      colors[(i / 3) * 4 + 2] = color[2];
+      colors[(i / 3) * 4 + 3] = color[3];
     }
 
-    // Set colors
-    for (let i = 0; i < colors.length; i += 4) {
-      colors[i + 0] = color[0];
-      colors[i + 1] = color[1];
-      colors[i + 2] = color[2];
-      colors[i + 3] = color[3];
+    if (!uvMap)
+      return {
+        position: vertices,
+        normal: normals,
+        color: colors,
+        index: triangles,
+      };
+
+    // uv mapping
+    const uv = new Float32Array((numVertices + numDuplicates) * 2);
+    for (let i = 0; i < numVertices; i++) {
+      uv[2 * i + 0] =
+        Math.atan2(vertices[3 * i + 2], vertices[3 * i]) / (2 * Math.PI) + 0.5;
+      uv[2 * i + 1] = Math.asin(vertices[3 * i + 1]) / Math.PI + 0.5;
+    }
+
+    const duplicates = new Map();
+
+    function addDuplicate(i, uvx, uvy, cached) {
+      if (cached) {
+        const dupe = duplicates.get(i);
+        if (dupe !== undefined) return dupe;
+      }
+      vertices[3 * v + 0] = vertices[3 * i + 0];
+      vertices[3 * v + 1] = vertices[3 * i + 1];
+      vertices[3 * v + 2] = vertices[3 * i + 2];
+      uv[2 * v + 0] = uvx;
+      uv[2 * v + 1] = uvy;
+      if (cached) duplicates.set(i, v);
+      return v++;
+    }
+
+    for (let i = 0; i < triangles.length; i += 3) {
+      const a = triangles[i + 0];
+      const b = triangles[i + 1];
+      const c = triangles[i + 2];
+      let ax = uv[2 * a];
+      let bx = uv[2 * b];
+      let cx = uv[2 * c];
+      const ay = uv[2 * a + 1];
+      const by = uv[2 * b + 1];
+      const cy = uv[2 * c + 1];
+
+      // uv fixing code; don't ask me how I got here
+      if (bx - ax >= 0.5 && ay !== 1) bx -= 1;
+      if (cx - bx > 0.5) cx -= 1;
+      if ((ax > 0.5 && ax - cx > 0.5) || (ax === 1 && cy === 0)) ax -= 1;
+      if (bx > 0.5 && bx - ax > 0.5) bx -= 1;
+
+      if (ay === 0 || ay === 1) {
+        ax = (bx + cx) / 2;
+        if (ay === bx) uv[2 * a] = ax;
+        else triangles[i + 0] = addDuplicate(a, ax, ay, false);
+      } else if (by === 0 || by === 1) {
+        bx = (ax + cx) / 2;
+        if (by === ax) uv[2 * b] = bx;
+        else triangles[i + 1] = addDuplicate(b, bx, by, false);
+      } else if (cy === 0 || cy === 1) {
+        cx = (ax + bx) / 2;
+        if (cy === ax) uv[2 * c] = cx;
+        else triangles[i + 2] = addDuplicate(c, cx, cy, false);
+      }
+      if (ax !== uv[2 * a] && ay !== 0 && ay !== 1)
+        triangles[i + 0] = addDuplicate(a, ax, ay, true);
+      if (bx !== uv[2 * b] && by !== 0 && by !== 1)
+        triangles[i + 1] = addDuplicate(b, bx, by, true);
+      if (cx !== uv[2 * c] && cy !== 0 && cy !== 1)
+        triangles[i + 2] = addDuplicate(c, cx, cy, true);
     }
 
     return {
       position: vertices,
       normal: normals,
       color: colors,
-      textCoord: uvs,
+      texCoord: uv,
       index: triangles,
     };
   }
