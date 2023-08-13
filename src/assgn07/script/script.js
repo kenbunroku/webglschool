@@ -62,23 +62,19 @@ class App {
      */
     this.uniformLocation = null;
 
-    /** Object of plane geometry
+    /** Object of sphere geometry
      * @type {object}
      */
-    this.planeGeometry = null;
+    this.icosphereGeometry = null;
 
-    /** Arry of plane VBO
+    /** Arry of sphere VBO
      * @type {Array.<WebGLBuffer>}
      */
-    this.planeVBO = null;
+    this.icosphereVBO = null;
 
-    /** Plane geometry IBO
+    /** sphere geometry IBO
      * @type {WebGLBuffer}
      */
-    this.planeIBO = null;
-
-    this.icosphereGeometry = null;
-    this.icosphereVBO = null;
     this.icosphereIBO = null;
 
     /** Time stamp of start time
@@ -150,14 +146,17 @@ class App {
     this.canvas = document.getElementById("webgl-canvas");
     this.gl = WebGLUtility.createWebGLContext(this.canvas);
 
+    const v3 = WebGLMath.Vec3;
+
     // Create instances of camera control
     const cameraOption = {
-      distance: 5.0,
+      distance: 4.5,
       min: 1.0,
       max: 10.0,
       move: 2.0,
     };
     this.camera = new WebGLOrbitCamera(this.canvas, cameraOption);
+    this.camera.setPosition(v3.create(0.0, 1.0, cameraOption.distance));
 
     // Resize canvas
     this.resize();
@@ -207,21 +206,19 @@ class App {
   setupGeometry() {
     // Create isosphere geometry
     const order = 4;
-    const color = [1.0, 1.0, 1.0, 1.0];
-    this.icosphereGeometry = WebGLGeometry.icosphere(order, color, true);
+
+    this.icosphereGeometry = WebGLGeometry.icosphere(order, true);
 
     // Create VBO and IBO\
     this.icosphereVBO = [
       WebGLUtility.createVBO(this.gl, this.icosphereGeometry.position),
       WebGLUtility.createVBO(this.gl, this.icosphereGeometry.normal),
-      WebGLUtility.createVBO(this.gl, this.icosphereGeometry.color),
       WebGLUtility.createVBO(this.gl, this.icosphereGeometry.texCoord),
     ];
     this.icosphereIBO = WebGLUtility.createIBO(
       this.gl,
       this.icosphereGeometry.index
     );
-    console.log(this.icosphereGeometry)
   }
 
   /** Set up Attribute Location */
@@ -232,15 +229,15 @@ class App {
     this.attributeLocation = [
       gl.getAttribLocation(this.program, "position"),
       gl.getAttribLocation(this.program, "normal"),
-      gl.getAttribLocation(this.program, "color"),
       gl.getAttribLocation(this.program, "texCoord"),
     ];
 
     // attribute stride
-    this.attributeStride = [3, 3, 4, 2];
+    this.attributeStride = [3, 3, 2];
 
     // Get uniform location
     this.uniformLocation = {
+      mMatrix: gl.getUniformLocation(this.program, "mMatrix"),
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
       textureUnit: gl.getUniformLocation(this.program, "textureUnit"),
@@ -284,13 +281,13 @@ class App {
     if (this.isRender) requestAnimationFrame(this.render);
 
     // Get the elapsed time
-    const nowTime = (Date.now() - this.startTiem) * 0.001;
+    const nowTime = (Date.now() - this.startTime) * 0.0001;
 
     // Set up rendering
     this.setupRendering();
 
     // Model coordinate transformation matrix
-    const m = m4.identity();
+    const m = m4.rotate(m4.identity(), nowTime, v3.create(0.0, 1.0, 0.0));
 
     // View and projection coordinate transformation matrix
     const v = this.camera.update();
