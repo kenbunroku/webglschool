@@ -17,17 +17,6 @@ window.addEventListener(
       app.setupLocation();
       app.start();
     });
-
-    // Gui with teakpane
-    const pane = new Pane();
-    const parameter = {
-      texture: true,
-    };
-
-    // Turn on/off texture
-    pane.addInput(parameter, "texture").on("change", (event) => {
-      app.setTextureVisibility(event.value);
-    });
   },
   false
 );
@@ -306,11 +295,7 @@ class App {
 
     // Bine texture to texture unit 0
     gl.activeTexture(gl.TEXTURE0);
-    if (this.textureVisibility) {
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    } else {
-      gl.bindTexture(gl.TEXTURE_2D, null);
-    }
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
     // Update uniform variables
     gl.useProgram(this.program);
