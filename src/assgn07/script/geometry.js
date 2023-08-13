@@ -697,7 +697,7 @@ export class WebGLGeometry {
     return { position: pos, normal: nor, color: col, texCoord: st, index: idx };
   }
 
-  static icosphere(order = 0, color = [1.0, 1.0, 1.0, 1.0], uvMap = false) {
+  static icosphere(order = 0, uvMap = false) {
     if (order > 10) throw new Error(`Max order is 10, but given ${order}.`);
 
     // set up a 20-triangle icosahedron
@@ -713,7 +713,6 @@ export class WebGLGeometry {
 
     const vertices = new Float32Array((numVertices + numDuplicates) * 3);
     const normals = new Float32Array(vertices.length);
-    const colors = new Float32Array((numVertices + numDuplicates) * 4);
 
     vertices.set(
       Float32Array.of(
@@ -883,18 +882,10 @@ export class WebGLGeometry {
       normals[i + 2] = vertices[i + 2];
     }
 
-    for (let i = 0; i < numVertices * 4; i += 4) {
-      colors[i + 0] = color[0];
-      colors[i + 1] = 1;
-      colors[i + 2] = 1;
-      colors[i + 3] = 1;
-    }
-
     if (!uvMap)
       return {
         position: vertices,
         normal: normals,
-        color: colors,
         index: triangles,
       };
 
@@ -916,10 +907,10 @@ export class WebGLGeometry {
       vertices[3 * v + 0] = vertices[3 * i + 0];
       vertices[3 * v + 1] = vertices[3 * i + 1];
       vertices[3 * v + 2] = vertices[3 * i + 2];
-      colors[4 * v + 0] = colors[4 * i + 0];
-      colors[4 * v + 1] = colors[4 * i + 1];
-      colors[4 * v + 2] = colors[4 * i + 2];
-      colors[4 * v + 3] = colors[4 * i + 3];
+      // colors[4 * v + 0] = [1.0, 1.0, 1.0, 0.0];
+      // colors[4 * v + 1] = [1.0, 1.0, 1.0, 0.0];
+      // colors[4 * v + 2] = [1.0, 1.0, 1.0, 0.0];
+      // colors[4 * v + 3] = [1.0, 1.0, 1.0, 0.0];
       uv[2 * v + 0] = uvx;
       uv[2 * v + 1] = uvy;
       if (cached) duplicates.set(i, v);
@@ -971,7 +962,6 @@ export class WebGLGeometry {
     return {
       position: vertices,
       normal: normals,
-      color: colors,
       texCoord: uv,
       index: triangles,
     };
