@@ -80,6 +80,7 @@ class App {
      * @type {WebGLTexture}
      */
     this.texture = null;
+    this.textures = [];
 
     /** Flag for render
      * @type {boolean}
@@ -183,8 +184,12 @@ class App {
         );
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
 
-        WebGLUtility.loadImage("/img/blue-marble.jpg").then((image) => {
-          this.texture = WebGLUtility.createTexture(gl, image);
+        WebGLUtility.loadImages([
+          "/img/blue-marble.jpg",
+          "/img/mars.jpg",
+          "/img/jupiter.jpg",
+        ]).then((images) => {
+          this.textures = WebGLUtility.createTextures(gl, images);
           resolve();
         });
       }
@@ -230,6 +235,8 @@ class App {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
       normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"),
       textureUnit: gl.getUniformLocation(this.program, "textureUnit"),
+      textureUnit2: gl.getUniformLocation(this.program, "textureUnit2"),
+      time: gl.getUniformLocation(this.program, "time"),
     };
   }
 
@@ -295,13 +302,17 @@ class App {
 
     // Bine texture to texture unit 0
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.bindTexture(gl.TEXTURE_2D, this.textures[0]);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.textures[1]);
 
     // Update uniform variables
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.uniformLocation.mvpMatrix, false, mvp);
     gl.uniformMatrix4fv(this.uniformLocation.normalMatrix, false, normalMatrix);
     gl.uniform1i(this.uniformLocation.textureUnit, 0);
+    gl.uniform1i(this.uniformLocation.textureUnit2, 1);
+    gl.uniform1f(this.uniformLocation.time, nowTime);
 
     // Set VBO and IBO and draw geometry
     WebGLUtility.enableBuffer(

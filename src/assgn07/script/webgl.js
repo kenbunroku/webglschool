@@ -51,6 +51,10 @@ export class WebGLUtility {
     });
   }
 
+  static loadImages(paths) {
+    return Promise.all(paths.map((path) => WebGLUtility.loadImage(path)));
+  }
+
   /**
    * canvas を受け取り WebGL コンテキストを初期化する
    * @param {HTMLCanvasElement} canvas - WebGL コンテキストを取得する canvas 要素
@@ -225,5 +229,13 @@ export class WebGLUtility {
     // 安全の為にテクスチャのバインドを解除してから返す
     gl.bindTexture(gl.TEXTURE_2D, null);
     return texture;
+  }
+
+  static createTextures(gl, resources) {
+    const textures = [];
+    for (let i = 0; i < resources.length; ++i) {
+      textures.push(this.createTexture(gl, resources[i]));
+    }
+    return textures;
   }
 }
