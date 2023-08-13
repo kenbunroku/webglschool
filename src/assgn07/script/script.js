@@ -2,6 +2,7 @@ import { WebGLUtility } from "./webgl.js";
 import { WebGLMath } from "./math.js";
 import { WebGLGeometry } from "./geometry.js";
 import { WebGLOrbitCamera } from "./camera.js";
+import gsap from "gsap";
 import { Pane } from "tweakpane";
 
 import vertexShaderSource from "/@shaders/assgn07/main.vert";
@@ -81,6 +82,9 @@ class App {
      */
     this.texture = null;
     this.textures = [];
+    this.currentIdx = 0;
+    this.currentTexture;
+    this.nextTexture;
 
     /** Flag for render
      * @type {boolean}
@@ -92,9 +96,16 @@ class App {
      */
     this.textureVisibility = true;
 
+    this.progress = { value: 0 };
+    this.isRunning = false;
+
     // Bind to fix this
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
+    this.next = this.next.bind(this);
+
+    // click event
+    window.addEventListener("click", this.next, false);
   }
 
   /** Set up backface culling
@@ -190,6 +201,9 @@ class App {
           "/img/jupiter.jpg",
         ]).then((images) => {
           this.textures = WebGLUtility.createTextures(gl, images);
+          // Set texture
+          this.currentTexture = this.textures[0];
+          this.nextTexture = this.textures[1];
           resolve();
         });
       }
@@ -237,6 +251,7 @@ class App {
       textureUnit: gl.getUniformLocation(this.program, "textureUnit"),
       textureUnit2: gl.getUniformLocation(this.program, "textureUnit2"),
       time: gl.getUniformLocation(this.program, "time"),
+      progress: gl.getUniformLocation(this.program, "progress"),
     };
   }
 
@@ -265,6 +280,25 @@ class App {
   stop() {
     // Turn off render flag
     this.isRender = false;
+  }
+
+  next() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    let len = this.textures.length;
+    let nextTexture = this.textures[(this.currentIdx + 1.0) % len];
+    this.nextTexture = nextTexture;
+    let tl = gsap.timeline();
+    tl.to(this.progress, 1, {
+      value: 1.0,
+      ease: "power2.easeInOut",
+      onComplete: () => {
+        this.currentIdx = (this.currentIdx + 1) % len;
+        this.currentTexture = nextTexture;
+        this.progress.value = 0.0;
+        this.isRunning = false;
+      },
+    });
   }
 
   /** Rendering function */
@@ -302,9 +336,9 @@ class App {
 
     // Bine texture to texture unit 0
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.textures[0]);
+    gl.bindTexture(gl.TEXTURE_2D, this.currentTexture);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.textures[1]);
+    gl.bindTexture(gl.TEXTURE_2D, this.nextTexture);
 
     // Update uniform variables
     gl.useProgram(this.program);
@@ -313,6 +347,7 @@ class App {
     gl.uniform1i(this.uniformLocation.textureUnit, 0);
     gl.uniform1i(this.uniformLocation.textureUnit2, 1);
     gl.uniform1f(this.uniformLocation.time, nowTime);
+    gl.uniform1f(this.uniformLocation.progress, this.progress.value);
 
     // Set VBO and IBO and draw geometry
     WebGLUtility.enableBuffer(
