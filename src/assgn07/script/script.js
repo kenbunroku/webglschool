@@ -199,6 +199,11 @@ class App {
           "/img/blue-marble.jpg",
           "/img/mars.jpg",
           "/img/jupiter.jpg",
+          "/img/saturn.jpg",
+          "/img/uranus.jpg",
+          "/img/neptune.jpg",
+          "/img/venus.jpg",
+          "/img/mercury.jpg",
         ]).then((images) => {
           this.textures = WebGLUtility.createTextures(gl, images);
           // Set texture
