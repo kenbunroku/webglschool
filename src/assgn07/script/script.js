@@ -106,6 +106,28 @@ class App {
 
     // click event
     window.addEventListener("click", this.next, false);
+
+    document.querySelector(".active").innerHTML = `
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="33" />
+            <path
+            id="base-timer-path-remaining"
+            stroke-dasharray="283 283"
+            class = "base-timer__path-remaining"
+            style="color:"white"
+            d="
+              M 50, 50
+              m -33, 0
+              a 33,33 0 1,0 66,0
+              a 33,33 0 1,0 -66,0
+            "
+            ></path>
+          </g>
+        </svg>
+      </div>
+    `;
   }
 
   /** Set up backface culling
@@ -202,8 +224,8 @@ class App {
           "/img/saturn.jpg",
           "/img/uranus.jpg",
           "/img/neptune.jpg",
-          "/img/venus.jpg",
           "/img/mercury.jpg",
+          "/img/venus.jpg",
         ]).then((images) => {
           this.textures = WebGLUtility.createTextures(gl, images);
           // Set texture
@@ -277,6 +299,8 @@ class App {
 
     // Turn on render flag
     this.isRender = true;
+
+    setInterval(this.next, 3000);
 
     this.render();
   }
