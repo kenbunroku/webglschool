@@ -402,8 +402,8 @@ class App {
     // Get the elapsed time
     let lastUpdate = this.startTime;
     const nowTime = (Date.now() - this.startTime) * 0.0001;
-    const now = Date.now() * 0.001;
-    const deltaTime = now - lastUpdate;
+    const now = Date.now();
+    const deltaTime = (now - lastUpdate) * 0.001;
 
     if (deltaTime >= 1000) {
       this.timePassed += 1;
@@ -415,7 +415,7 @@ class App {
       lastUpdate = now;
     }
 
-    if (this.timeLeft == 0) {
+    if (this.timeLeft <= 0) {
       this.timePassed = 0;
       this.timeLeft = this.TIME_LIMIT;
 
