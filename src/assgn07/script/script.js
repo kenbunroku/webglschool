@@ -341,9 +341,10 @@ class App {
     this.timerInterval = setInterval(() => {
       this.timePassed = this.timePassed += 1;
       this.timeLeft = this.TIME_LIMIT - this.timePassed;
+
       console.log(this.timeLeft);
 
-      if (this.timeLeft <= 0) {
+      if (this.timeLeft < 0) {
         clearInterval(this.timerInterval);
         this.timerInterval = null; // Reset the interval reference
       }
@@ -374,6 +375,7 @@ class App {
       this.startTimer();
       this.next();
 
+      this.timeLeft = this.TIME_LIMIT;
       this.timePassed = 0;
     }, this.TIME_LIMIT * 1000);
 
