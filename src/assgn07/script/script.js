@@ -113,8 +113,8 @@ class App {
     this.render = this.render.bind(this);
     this.next = this.next.bind(this);
 
-    // click event
-    window.addEventListener("click", this.next, false);
+    // // click event
+    // window.addEventListener("click", this.next, false);
   }
 
   /** Set up backface culling
