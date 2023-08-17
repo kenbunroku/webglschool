@@ -206,8 +206,6 @@ class App {
         );
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
 
-        const basePath = document.baseURI;
-        console.log(basePath);
         const config = {
           basePath:
             location.hostname === "localhost" ||
@@ -321,9 +319,6 @@ class App {
 
   calclulateTimeFraction() {
     const rawTimeFraction = this.timeLeft / this.TIME_LIMIT;
-    if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
-      return 0;
-    }
     return rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction);
   }
 
@@ -339,27 +334,19 @@ class App {
   }
 
   startTimer() {
-    this.previewIdx = (this.previewIdx + 1) % this.textures.length;
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+
     this.timerInterval = setInterval(() => {
       this.timePassed = this.timePassed += 1;
-
-      if (this.timeLeft == 0) {
-        // pass active class to next planet
-        let activePlanet = document.querySelector(".active");
-        activePlanet.classList.remove("active");
-        activePlanet.innerHTML = "";
-        const planets = document.querySelectorAll(".ring");
-        planets[this.previewIdx].classList.add("active");
-        this.setTimerOnActivePlanet();
-        this.next();
-
-        clearInterval(this.timerInterval);
-
-        this.timePassed = 0;
-        this.timeLeft = this.TIME_LIMIT;
-      }
       this.timeLeft = this.TIME_LIMIT - this.timePassed;
+      console.log(this.timeLeft);
 
+      if (this.timeLeft <= 0) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null; // Reset the interval reference
+      }
       this.setCircleDasharray();
     }, 1000);
   }
@@ -373,6 +360,22 @@ class App {
     this.isRender = true;
 
     this.startTimer();
+
+    setInterval(() => {
+      this.previewIdx = (this.previewIdx + 1) % this.textures.length;
+      // pass active class to next planet
+      let activePlanet = document.querySelector(".active");
+      activePlanet.classList.remove("active");
+      activePlanet.innerHTML = "";
+      const planets = document.querySelectorAll(".ring");
+      planets[this.previewIdx].classList.add("active");
+      this.setTimerOnActivePlanet();
+
+      this.startTimer();
+      this.next();
+
+      this.timePassed = 0;
+    }, this.TIME_LIMIT * 1000);
 
     this.render();
   }
@@ -395,8 +398,6 @@ class App {
       ease: "power2.easeInOut",
       onComplete: () => {
         this.currentIdx = (this.currentIdx + 1) % len;
-        this.startTimer();
-
         this.currentTexture = nextTexture;
         this.progress.value = 0.0;
         this.isRunning = false;
