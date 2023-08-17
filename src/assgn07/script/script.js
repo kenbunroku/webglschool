@@ -91,6 +91,8 @@ class App {
     this.timeLeft = this.TIME_LIMIT;
     this.timerInterval = null;
 
+    this.previewIdx = 2;
+
     /** Flag for render
      * @type {boolean}
      */
@@ -111,28 +113,6 @@ class App {
 
     // click event
     window.addEventListener("click", this.next, false);
-
-    document.querySelector(".active").innerHTML = `
-      <div class="base-timer">
-        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g class="base-timer__circle">
-            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="33" />
-            <path
-            id="base-timer-path-remaining"
-            stroke-dasharray="207"
-            class = "base-timer__path-remaining"
-            style="color:"white"
-            d="
-              M 50, 50
-              m -33, 0
-              a 33,33 0 1,0 66,0
-              a 33,33 0 1,0 -66,0
-            "
-            ></path>
-          </g>
-        </svg>
-      </div>
-    `;
   }
 
   /** Set up backface culling
@@ -194,6 +174,8 @@ class App {
 
     // Activate depth test
     this.gl.enable(this.gl.DEPTH_TEST);
+
+    this.setTimerOnActivePlanet();
   }
 
   /** Resize canvas */
@@ -297,8 +279,39 @@ class App {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
+  setTimerOnActivePlanet() {
+    const activeElement = document.querySelector(".active");
+
+    if (activeElement) {
+      activeElement.innerHTML = `
+            <div class="base-timer">
+                <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <g class="base-timer__circle">
+                        <circle class="base-timer__path-elapsed" cx="50" cy="50" r="33" />
+                        <path
+                        id="base-timer-path-remaining"
+                        stroke-dasharray="207"
+                        class="base-timer__path-remaining"
+                        style="color: white"
+                        d="
+                            M 50, 50
+                            m -33, 0
+                            a 33,33 0 1,0 66,0
+                            a 33,33 0 1,0 -66,0
+                        "
+                        ></path>
+                    </g>
+                </svg>
+            </div>
+        `;
+    }
+  }
+
   calclulateTimeFraction() {
     const rawTimeFraction = this.timeLeft / this.TIME_LIMIT;
+    if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
+      return 0;
+    }
     return rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction);
   }
 
@@ -314,13 +327,23 @@ class App {
   }
 
   startTimer() {
+    this.previewIdx = (this.previewIdx + 1) % this.textures.length;
     this.timerInterval = setInterval(() => {
       this.timePassed = this.timePassed += 1;
 
       if (this.timeLeft === 0) {
         clearInterval(this.timerInterval);
+        this.next();
         this.timePassed = 0;
         this.timeLeft = this.TIME_LIMIT;
+
+        // pass active class to next planet
+        let activePlanet = document.querySelector(".active");
+        activePlanet.classList.remove("active");
+        activePlanet.innerHTML = "";
+        const planets = document.querySelectorAll(".ring");
+        planets[this.previewIdx].classList.add("active");
+        this.setTimerOnActivePlanet();
       }
       this.timeLeft = this.TIME_LIMIT - this.timePassed;
 
@@ -335,10 +358,6 @@ class App {
 
     // Turn on render flag
     this.isRender = true;
-
-    setInterval(() => {
-      this.next();
-    }, this.TIME_LIMIT * 1000 + 1000);
 
     this.startTimer();
 
@@ -358,15 +377,16 @@ class App {
     let nextTexture = this.textures[(this.currentIdx + 1.0) % len];
     this.nextTexture = nextTexture;
     let tl = gsap.timeline();
-    tl.to(this.progress, 1, {
+    tl.to(this.progress, 1.0, {
       value: 1.0,
       ease: "power2.easeInOut",
       onComplete: () => {
         this.currentIdx = (this.currentIdx + 1) % len;
+        this.startTimer();
+
         this.currentTexture = nextTexture;
         this.progress.value = 0.0;
         this.isRunning = false;
-        this.startTimer();
       },
     });
   }

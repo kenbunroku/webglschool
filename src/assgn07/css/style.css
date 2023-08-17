@@ -86,12 +86,12 @@ canvas {
 
 /* The SVG path that displays the timer's progress */
 .base-timer__path-elapsed {
-  stroke-width: 7px;
-  stroke: grey;
+  stroke-width: 3px;
+  stroke: black;
 }
 
 .base-timer__path-remaining {
-  stroke-width: 7px;
+  stroke-width: 3px;
   stroke-linecap: round;
   transform: rotate(90deg);
   transform-origin: center;
