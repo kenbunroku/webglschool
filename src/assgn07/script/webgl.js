@@ -46,6 +46,15 @@ export class WebGLUtility {
         },
         false
       );
+
+      img.addEventListener(
+        "error",
+        (err) => {
+          reject(new Error(`Failed to load image at path: ${path}`));
+        },
+        false
+      );
+
       // 読み込む画像のパスを設定する
       img.src = path;
     });
