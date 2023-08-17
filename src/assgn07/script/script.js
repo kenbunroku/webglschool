@@ -362,23 +362,6 @@ class App {
 
     this.startTimer();
 
-    setInterval(() => {
-      this.previewIdx = (this.previewIdx + 1) % this.textures.length;
-      // pass active class to next planet
-      let activePlanet = document.querySelector(".active");
-      activePlanet.classList.remove("active");
-      activePlanet.innerHTML = "";
-      const planets = document.querySelectorAll(".ring");
-      planets[this.previewIdx].classList.add("active");
-      this.setTimerOnActivePlanet();
-
-      this.startTimer();
-      this.next();
-
-      this.timeLeft = this.TIME_LIMIT;
-      this.timePassed = 0;
-    }, this.TIME_LIMIT * 1000);
-
     this.render();
   }
 
@@ -417,7 +400,39 @@ class App {
     if (this.isRender) requestAnimationFrame(this.render);
 
     // Get the elapsed time
+    let lastUpdate = this.startTime;
     const nowTime = (Date.now() - this.startTime) * 0.0001;
+    const now = Date.now() * 0.001;
+    const deltaTime = now - lastUpdate;
+
+    if (deltaTime >= 1000) {
+      this.timePassed += 1;
+      this.timeLeft = this.TIME_LIMIT - this.timePassed;
+
+      console.log(this.timeLeft);
+
+      this.setCircleDasharray();
+      lastUpdate = now;
+    }
+
+    if (this.timeLeft == 0) {
+      this.timePassed = 0;
+      this.timeLeft = this.TIME_LIMIT;
+
+      // Switch the active planet when time runs out
+      this.previewIdx = (this.previewIdx + 1) % this.textures.length;
+
+      let activePlanet = document.querySelector(".active");
+      activePlanet.classList.remove("active");
+      activePlanet.innerHTML = "";
+
+      const planets = document.querySelectorAll(".ring");
+      planets[this.previewIdx].classList.add("active");
+      this.setTimerOnActivePlanet();
+
+      this.startTimer();
+      this.next();
+    }
 
     // Set up rendering
     this.setupRendering();
