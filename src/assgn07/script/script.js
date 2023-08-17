@@ -321,9 +321,9 @@ class App {
 
   calclulateTimeFraction() {
     const rawTimeFraction = this.timeLeft / this.TIME_LIMIT;
-    // if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
-    //   return 0;
-    // }
+    if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
+      return 0;
+    }
     return rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction);
   }
 
@@ -343,12 +343,7 @@ class App {
     this.timerInterval = setInterval(() => {
       this.timePassed = this.timePassed += 1;
 
-      if (this.timeLeft === 0) {
-        clearInterval(this.timerInterval);
-        this.next();
-        this.timePassed = 0;
-        this.timeLeft = this.TIME_LIMIT;
-
+      if (this.timeLeft == 0) {
         // pass active class to next planet
         let activePlanet = document.querySelector(".active");
         activePlanet.classList.remove("active");
@@ -356,6 +351,12 @@ class App {
         const planets = document.querySelectorAll(".ring");
         planets[this.previewIdx].classList.add("active");
         this.setTimerOnActivePlanet();
+        this.next();
+
+        clearInterval(this.timerInterval);
+
+        this.timePassed = 0;
+        this.timeLeft = this.TIME_LIMIT;
       }
       this.timeLeft = this.TIME_LIMIT - this.timePassed;
 
