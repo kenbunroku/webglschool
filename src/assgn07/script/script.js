@@ -206,15 +206,24 @@ class App {
         );
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
 
+        const basePath = document.baseURI;
+        const config = {
+          basePath:
+            location.hostname === "localhost" ||
+            location.hostname === "127.0.0.1"
+              ? ""
+              : document.baseURI,
+        };
+
         WebGLUtility.loadImages([
-          "/img/blue-marble.jpg",
-          "/img/mars.jpg",
-          "/img/jupiter.jpg",
-          "/img/saturn.jpg",
-          "/img/uranus.jpg",
-          "/img/neptune.jpg",
-          "/img/mercury.jpg",
-          "/img/venus.jpg",
+          `${config.basePath}/img/blue-marble.jpg`,
+          `${config.basePath}/img/mars.jpg`,
+          `${config.basePath}/img/jupiter.jpg`,
+          `${config.basePath}/img/saturn.jpg`,
+          `${config.basePath}/img/uranus.jpg`,
+          `${config.basePath}/img/neptune.jpg`,
+          `${config.basePath}/img/mercury.jpg`,
+          `${config.basePath}/img/venus.jpg`,
         ]).then((images) => {
           this.textures = WebGLUtility.createTextures(gl, images);
           // Set texture
