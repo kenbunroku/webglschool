@@ -86,6 +86,11 @@ class App {
     this.currentTexture;
     this.nextTexture;
 
+    this.TIME_LIMIT = 5;
+    this.timePassed = 0;
+    this.timeLeft = this.TIME_LIMIT;
+    this.timerInterval = null;
+
     /** Flag for render
      * @type {boolean}
      */
@@ -114,7 +119,7 @@ class App {
             <circle class="base-timer__path-elapsed" cx="50" cy="50" r="33" />
             <path
             id="base-timer-path-remaining"
-            stroke-dasharray="283 283"
+            stroke-dasharray="207"
             class = "base-timer__path-remaining"
             style="color:"white"
             d="
@@ -292,6 +297,37 @@ class App {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
+  calclulateTimeFraction() {
+    const rawTimeFraction = this.timeLeft / this.TIME_LIMIT;
+    return rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction);
+  }
+
+  setCircleDasharray() {
+    const FULL_DASH_ARRAY = 2 * Math.PI * 33;
+    const circleDasharray = `${(
+      this.calclulateTimeFraction() * FULL_DASH_ARRAY
+    ).toFixed(0)} 207`;
+
+    document
+      .getElementById("base-timer-path-remaining")
+      .setAttribute("stroke-dasharray", circleDasharray);
+  }
+
+  startTimer() {
+    this.timerInterval = setInterval(() => {
+      this.timePassed = this.timePassed += 1;
+
+      if (this.timeLeft === 0) {
+        clearInterval(this.timerInterval);
+        this.timePassed = 0;
+        this.timeLeft = this.TIME_LIMIT;
+      }
+      this.timeLeft = this.TIME_LIMIT - this.timePassed;
+
+      this.setCircleDasharray();
+    }, 1000);
+  }
+
   /** Start rendering */
   start() {
     // Get time stamp of start time
@@ -300,7 +336,11 @@ class App {
     // Turn on render flag
     this.isRender = true;
 
-    setInterval(this.next, 3000);
+    setInterval(() => {
+      this.next();
+    }, this.TIME_LIMIT * 1000 + 1000);
+
+    this.startTimer();
 
     this.render();
   }
@@ -326,6 +366,7 @@ class App {
         this.currentTexture = nextTexture;
         this.progress.value = 0.0;
         this.isRunning = false;
+        this.startTimer();
       },
     });
   }
