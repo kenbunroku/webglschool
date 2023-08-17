@@ -321,9 +321,9 @@ class App {
 
   calclulateTimeFraction() {
     const rawTimeFraction = this.timeLeft / this.TIME_LIMIT;
-    if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
-      return 0;
-    }
+    // if (rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction) < 0) {
+    //   return 0;
+    // }
     return rawTimeFraction - (1 / this.TIME_LIMIT) * (1 - rawTimeFraction);
   }
 
