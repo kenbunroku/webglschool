@@ -86,11 +86,13 @@ class App {
     this.currentTexture;
     this.nextTexture;
 
+    /** Variables for Timer Effect
+     * @type {number}
+     */
     this.TIME_LIMIT = 5;
     this.timePassed = 0;
     this.timeLeft = this.TIME_LIMIT;
     this.timerInterval = null;
-
     this.previewIdx = 2;
 
     /** Flag for render
