@@ -207,12 +207,13 @@ class App {
         this.program = WebGLUtility.createProgramObject(gl, vs, fs);
 
         const basePath = document.baseURI;
+        console.log(basePath);
         const config = {
           basePath:
             location.hostname === "localhost" ||
             location.hostname === "127.0.0.1"
               ? ""
-              : document.baseURI,
+              : "/webglschool",
         };
 
         WebGLUtility.loadImages([
