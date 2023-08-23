@@ -10,7 +10,6 @@ varying vec3 vNormal;
 void main() {
     // Calculate the vertex position in world coordinates
     vPosition = (mMatrix * vec4(position, 1.0)).xyz;
-    
     vNormal = normal;
 
     vTexCoord = texCoord;
