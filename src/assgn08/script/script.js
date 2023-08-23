@@ -5,8 +5,10 @@ import { WebGLOrbitCamera } from "./camera.js";
 import gsap from "gsap";
 import { Pane } from "tweakpane";
 
-import vertexShaderSource from "/@shaders/assgn08/main.vert";
-import fragmentShaderSource from "/@shaders/assgn08/main.frag";
+import vertexShaderSource from "/@shaders/assgn08/render.vert";
+import fragmentShaderSource from "/@shaders/assgn08/render.frag";
+import offscreenVertexShaderSource from "/@shaders/assgn08/offscreen.vert";
+import offscreenFragmentShaderSource from "/@shaders/assgn08/offscreen.frag";
 
 window.addEventListener(
   "DOMContentLoaded",
@@ -54,21 +56,25 @@ class App {
      * @type {object.<WebGLUniformLocation>}
      */
     this.renderUniLocation = null;
+    this.offscreenUniLocation = null;
 
     /** Object of plane geometry
      * @type {object}
      */
     this.planeGeometry = null;
+    this.offscreenPlaneGeometry = null;
 
     /** Arry of plane VBO
      * @type {Array.<WebGLBuffer>}
      */
     this.planeVBO = null;
+    this.offscreenPlaneVBO = null;
 
     /** sphere plane IBO
      * @type {WebGLBuffer}
      */
     this.planeIBO = null;
+    this.offscreenPlaneIBO = null;
 
     /** Time stamp of start time
      *    @type {number}
@@ -184,6 +190,22 @@ class App {
   resize() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+
+    // Update frame buffer
+    if (this.framebufferObject != null) {
+      WebGLUtility.deleteFramebuffer(
+        this.gl,
+        this.framebufferObject.framebuffer,
+        this.framebufferObject.renderbuffer,
+        this.framebufferObject.texture
+      );
+    }
+
+    this.framebufferObject = WebGLUtility.createFramebuffer(
+      this.gl,
+      this.canvas.width,
+      this.canvas.height
+    );
   }
 
   /** Load resources */
@@ -205,6 +227,18 @@ class App {
           gl.FRAGMENT_SHADER
         );
         this.renderProgram = WebGLUtility.createProgramObject(gl, vs, fs);
+
+        vs = WebGLUtility.createShaderObject(
+          gl,
+          offscreenVertexShaderSource,
+          gl.VERTEX_SHADER
+        );
+        fs = WebGLUtility.createShaderObject(
+          gl,
+          offscreenFragmentShaderSource,
+          gl.FRAGMENT_SHADER
+        );
+        this.offscreenProgram = WebGLUtility.createProgramObject(gl, vs, fs);
 
         const config = {
           basePath:
@@ -229,21 +263,24 @@ class App {
     const color = [1.0, 1.0, 1.0, 1.0];
     const size = 2.0;
 
-    // Create plane geometry
-    this.planeGeometry = WebGLGeometry.plane(
-      size * (this.canvas.width / this.canvas.height),
-      size,
-      color
-    );
-
-    // Create VBO and IBO
+    // Create plane for render program
+    this.planeGeometry = WebGLGeometry.plane(size, size, color);
     this.planeVBO = [
       WebGLUtility.createVBO(this.gl, this.planeGeometry.position),
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.normal),
       WebGLUtility.createVBO(this.gl, this.planeGeometry.texCoord),
-      WebGLUtility.createVBO(this.gl, this.planeGeometry.color),
     ];
     this.planeIBO = WebGLUtility.createIBO(this.gl, this.planeGeometry.index);
+
+    // Create plane for offscreen program
+    this.offscreenPlaneGeometry = WebGLGeometry.plane(size * 2, size, color);
+    this.offscreenPlaneVBO = [
+      WebGLUtility.createVBO(this.gl, this.offscreenPlaneGeometry.position),
+      WebGLUtility.createVBO(this.gl, this.offscreenPlaneGeometry.texCoord),
+    ];
+    this.offscreenPlaneIBO = WebGLUtility.createIBO(
+      this.gl,
+      this.offscreenPlaneGeometry.index
+    );
   }
 
   /** Set up Attribute Location */
@@ -253,19 +290,30 @@ class App {
     // Get attribute locations
     this.renderAttLocation = [
       gl.getAttribLocation(this.renderProgram, "position"),
-      gl.getAttribLocation(this.renderProgram, "normal"),
       gl.getAttribLocation(this.renderProgram, "texCoord"),
-      gl.getAttribLocation(this.renderProgram, "color"),
     ];
 
     // attribute stride
-    this.attributeStride = [3, 3, 2, 4];
+    this.renderAttStride = [3, 2];
 
     // Get uniform location
     this.renderUniLocation = {
-      mvpMatrix: gl.getUniformLocation(this.renderProgram, "mvpMatrix"),
-      normalMatrix: gl.getUniformLocation(this.renderProgram, "normalMatrix"),
       textureUnit: gl.getUniformLocation(this.renderProgram, "textureUnit"),
+    };
+
+    // Set up offscreen locations
+    this.offscreenAttLocation = [
+      gl.getAttribLocation(this.offscreenProgram, "position"),
+      gl.getAttribLocation(this.offscreenProgram, "texCoord"),
+    ];
+    this.offscreenAttStride = [3, 3, 2, 4];
+    this.offscreenUniLocation = {
+      mvpMatrix: gl.getUniformLocation(this.offscreenProgram, "mvpMatrix"),
+      normalMatrix: gl.getUniformLocation(
+        this.offscreenProgram,
+        "normalMatrix"
+      ),
+      textureUnit: gl.getUniformLocation(this.offscreenProgram, "textureUnit"),
     };
   }
 
@@ -273,10 +321,32 @@ class App {
   setupRendering() {
     const gl = this.gl;
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.useProgram(this.renderProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.framebufferObject.texture);
+  }
+
+  setupOffscreenRendering() {
+    const gl = this.gl;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebufferObject.framebuffer);
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+
+    gl.clearColor(1.0, 0.6, 0.9, 1.0);
+    gl.clearDepth(1.0);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.useProgram(this.offscreenProgram);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
   }
 
   /** Start rendering */
@@ -307,56 +377,58 @@ class App {
 
     const nowTime = (Date.now() - this.startTime) * 0.0001;
 
-    // Set up rendering
-    this.setupRendering();
+    // Set up offscreen rendering
+    {
+      this.setupOffscreenRendering();
 
-    // Model coordinate transformation matrix
-    const m = m4.identity();
+      const v = this.camera.update();
+      const fovy = 45;
+      const aspect = window.innerWidth / window.innerHeight;
+      const near = 0.1;
+      const far = 10.0;
+      const p = m4.perspective(fovy, aspect, near, far);
 
-    // View and projection coordinate transformation matrix
-    const v = this.camera.update();
-    const fovy =
-      2 * (180 / Math.PI) * Math.atan(2 / (2 * this.camera.distance));
-    const aspect = this.canvas.width / this.canvas.height;
-    const near = 0.1;
-    const far = 10.0;
-    const p = m4.perspective(fovy, aspect, near, far);
+      const vp = m4.multiply(p, v);
+      let m = m4.translate(m4.identity(), v3.create(0.0, -1.0, 0.0));
 
-    // Model-view-projection matrix
-    const vp = m4.multiply(p, v);
-    const mvp = m4.multiply(vp, m);
+      const mvp = m4.multiply(vp, m);
+      const normalMatrix = m4.transpose(m4.inverse(m));
 
-    // Normal matrix
-    const normalMatrix = m4.transpose(m4.inverse(m));
+      WebGLUtility.enableBuffer(
+        gl,
+        this.offscreenPlaneVBO,
+        this.offscreenAttLocation,
+        this.offscreenAttStride,
+        this.offscreenPlaneIBO
+      );
+      gl.uniformMatrix4fv(this.offscreenUniLocation.mvpMatrix, false, mvp);
+      gl.uniform1i(this.offscreenUniLocation.textureUnit, 0);
+      gl.drawElements(
+        gl.TRIANGLES,
+        this.offscreenPlaneGeometry.index.length,
+        gl.UNSIGNED_SHORT,
+        0
+      );
+    }
 
-    // Bine texture to texture unit 0
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    {
+      // Set up rendering
+      this.setupRendering();
 
-    // Update uniform variables
-    gl.useProgram(this.renderProgram);
-    gl.uniformMatrix4fv(this.renderUniLocation.mvpMatrix, false, mvp);
-    gl.uniformMatrix4fv(
-      this.renderUniLocation.normalMatrix,
-      false,
-      normalMatrix
-    );
-    gl.uniform1i(this.renderUniLocation.textureUnit, 0);
-    gl.uniform1f(this.renderUniLocation.time, nowTime);
-
-    // Set VBO and IBO and draw geometry
-    WebGLUtility.enableBuffer(
-      gl,
-      this.planeVBO,
-      this.renderAttLocation,
-      this.attributeStride,
-      this.planeIBO
-    );
-    gl.drawElements(
-      gl.TRIANGLES,
-      this.planeGeometry.index.length,
-      gl.UNSIGNED_SHORT,
-      0
-    );
+      WebGLUtility.enableBuffer(
+        gl,
+        this.planeVBO,
+        this.renderAttLocation,
+        this.renderAttStride,
+        this.planeIBO
+      );
+      gl.uniform1i(this.renderUniLocation.textureUnit, 0);
+      gl.drawElements(
+        gl.TRIANGLES,
+        this.planeGeometry.index.length,
+        gl.UNSIGNED_SHORT,
+        0
+      );
+    }
   }
 }

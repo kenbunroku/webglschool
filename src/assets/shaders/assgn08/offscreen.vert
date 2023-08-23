@@ -3,7 +3,6 @@ attribute vec3 normal;
 attribute vec2 texCoord;
 attribute vec4 color;
 
-uniform mat4 mMatrix;
 uniform mat4 mvpMatrix;
 
 varying vec2 vTexCoord;
