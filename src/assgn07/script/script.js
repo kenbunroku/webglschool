@@ -341,12 +341,12 @@ class App {
     this.timerInterval = setInterval(() => {
       this.timePassed = this.timePassed += 1;
       this.timeLeft = this.TIME_LIMIT - this.timePassed;
+      this.setCircleDasharray();
 
-      if (this.timeLeft < 0) {
+      if (this.timeLeft <= 0) {
         clearInterval(this.timerInterval);
         this.timerInterval = null; // Reset the interval reference
       }
-      this.setCircleDasharray();
     }, 1000);
   }
 
