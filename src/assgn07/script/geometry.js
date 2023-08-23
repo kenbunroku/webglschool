@@ -1,3 +1,5 @@
+import { WebGLMath } from "./math.js";
+
 /**
  * ジオメトリ情報を生成する
  * @class
@@ -698,6 +700,7 @@ export class WebGLGeometry {
   }
 
   static icosphere(order = 0, uvMap = false) {
+    const vec3 = WebGLMath.Vec3;
     if (order > 10) throw new Error(`Max order is 10, but given ${order}.`);
 
     // set up a 20-triangle icosahedron
@@ -711,8 +714,8 @@ export class WebGLGeometry {
       ? 3
       : Math.pow(2, order) * 3 + 9;
 
-    const vertices = new Float32Array((numVertices + numDuplicates) * 3);
-    const normals = new Float32Array(vertices.length);
+    let vertices = new Float32Array(numVertices * 3);
+    let normals = new Float32Array(vertices.length);
 
     vertices.set(
       Float32Array.of(
@@ -890,71 +893,89 @@ export class WebGLGeometry {
       };
 
     // uv mapping
-    const uv = new Float32Array((numVertices + numDuplicates) * 2);
+    let uv = new Float32Array(numVertices * 2);
     for (let i = 0; i < numVertices; i++) {
       uv[2 * i + 0] =
         Math.atan2(vertices[3 * i + 2], vertices[3 * i]) / (2 * Math.PI) + 0.5;
       uv[2 * i + 1] = Math.asin(vertices[3 * i + 1]) / Math.PI + 0.5;
     }
 
-    const duplicates = new Map();
+    const wrapped = [];
+    const copiedUv = [...uv];
+    const copiedPositions = [...vertices];
+    const copiedNormals = [...normals];
+    let vertexIndex = uv.length / 2 - 1; // Assuming uv is a flat array [u1, v1, u2, v2, ...]
 
-    function addDuplicate(i, uvx, uvy, cached) {
-      if (cached) {
-        const dupe = duplicates.get(i);
-        if (dupe !== undefined) return dupe;
+    for (let i = 0; i < triangles.length / 3; i++) {
+      const a = triangles[i * 3];
+      const b = triangles[i * 3 + 1];
+      const c = triangles[i * 3 + 2];
+
+      const uA = uv[2 * a];
+      const uB = uv[2 * b];
+      const uC = uv[2 * c];
+
+      const texA = vec3.create(uA, uv[2 * a + 1], 0);
+      const texB = vec3.create(uB, uv[2 * b + 1], 0);
+      const texC = vec3.create(uC, uv[2 * c + 1], 0);
+      const texNormal = vec3.cross(
+        vec3.subtract(texB, texA),
+        vec3.subtract(texC, texA)
+      );
+
+      if (texNormal[2] > 0) {
+        wrapped.push(i);
+
+        if (uA < 0.05 || uB < 0.05 || uC < 0.05) {
+          // Duplicate vertex positions and UVs for the entire triangle
+          copiedPositions.push(
+            vertices[3 * a],
+            vertices[3 * a + 1],
+            vertices[3 * a + 2]
+          );
+          copiedUv.push(uA + (uA < 0.05 ? 1 : 0), uv[2 * a + 1]);
+          copiedNormals.push(
+            normals[3 * a],
+            normals[3 * a + 1],
+            normals[3 * a + 2]
+          );
+          vertexIndex++;
+          triangles[i * 3] = vertexIndex;
+
+          copiedPositions.push(
+            vertices[3 * b],
+            vertices[3 * b + 1],
+            vertices[3 * b + 2]
+          );
+          copiedNormals.push(
+            normals[3 * b],
+            normals[3 * b + 1],
+            normals[3 * b + 2]
+          );
+          copiedUv.push(uB + (uB < 0.05 ? 1 : 0), uv[2 * b + 1]);
+          vertexIndex++;
+          triangles[i * 3 + 1] = vertexIndex;
+
+          copiedPositions.push(
+            vertices[3 * c],
+            vertices[3 * c + 1],
+            vertices[3 * c + 2]
+          );
+          copiedUv.push(uC + (uC < 0.05 ? 1 : 0), uv[2 * c + 1]);
+
+          copiedNormals.push(
+            normals[3 * c],
+            normals[3 * c + 1],
+            normals[3 * c + 2]
+          );
+          vertexIndex++;
+          triangles[i * 3 + 2] = vertexIndex;
+        }
       }
-      vertices[3 * v + 0] = vertices[3 * i + 0];
-      vertices[3 * v + 1] = vertices[3 * i + 1];
-      vertices[3 * v + 2] = vertices[3 * i + 2];
-      // colors[4 * v + 0] = [1.0, 1.0, 1.0, 0.0];
-      // colors[4 * v + 1] = [1.0, 1.0, 1.0, 0.0];
-      // colors[4 * v + 2] = [1.0, 1.0, 1.0, 0.0];
-      // colors[4 * v + 3] = [1.0, 1.0, 1.0, 0.0];
-      uv[2 * v + 0] = uvx;
-      uv[2 * v + 1] = uvy;
-      if (cached) duplicates.set(i, v);
-      return v++;
     }
-
-    for (let i = 0; i < triangles.length; i += 3) {
-      const a = triangles[i + 0];
-      const b = triangles[i + 1];
-      const c = triangles[i + 2];
-      let ax = uv[2 * a];
-      let bx = uv[2 * b];
-      let cx = uv[2 * c];
-      const ay = uv[2 * a + 1];
-      const by = uv[2 * b + 1];
-      const cy = uv[2 * c + 1];
-
-      // uv fixing code; don't ask me how I got here
-      if (bx - ax >= 0.5 && ay !== 1) bx -= 1;
-      if (cx - bx > 0.5) cx -= 1;
-      if ((ax > 0.5 && ax - cx > 0.5) || (ax === 1 && cy === 0)) ax -= 1;
-      if (bx > 0.5 && bx - ax > 0.5) bx -= 1;
-
-      if (ay === 0 || ay === 1) {
-        ax = (bx + cx) / 2;
-
-        if (ay === bx) uv[2 * a] = ax;
-        else triangles[i + 0] = addDuplicate(a, ax, ay, false);
-      } else if (by === 0 || by === 1) {
-        bx = (ax + cx) / 2;
-        if (by === ax) uv[2 * b] = bx;
-        else triangles[i + 1] = addDuplicate(b, bx, by, false);
-      } else if (cy === 0 || cy === 1) {
-        cx = (ax + bx) / 2;
-        if (cy === ax) uv[2 * c] = cx;
-        else triangles[i + 2] = addDuplicate(c, cx, cy, false);
-      }
-      if (ax !== uv[2 * a] && ay !== 0 && ay !== 1)
-        triangles[i + 0] = addDuplicate(a, ax, ay, true);
-      if (bx !== uv[2 * b] && by !== 0 && by !== 1)
-        triangles[i + 1] = addDuplicate(b, bx, by, true);
-      if (cx !== uv[2 * c] && cy !== 0 && cy !== 1)
-        triangles[i + 2] = addDuplicate(c, cx, cy, true);
-    }
+    vertices = copiedPositions;
+    uv = copiedUv;
+    normals = copiedNormals;
 
     // flip v in uv
     for (let i = 0; i < uv.length; i += 2) uv[i + 1] = 1 - uv[i + 1];
@@ -964,6 +985,7 @@ export class WebGLGeometry {
       normal: normals,
       texCoord: uv,
       index: triangles,
+      // colors: colors,
     };
   }
 }
