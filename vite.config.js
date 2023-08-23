@@ -22,7 +22,7 @@ export default defineConfig({
         assgn05: resolve(__dirname, 'src/assgn05/index.html'),
         assgn06: resolve(__dirname, 'src/assgn06/index.html'),
         assgn07: resolve(__dirname, 'src/assgn07/index.html'),
-        // assgn08: resolve(__dirname, 'src/assgn08/index.html'),
+        assgn08: resolve(__dirname, 'src/assgn08/index.html'),
       },
     },
   },
