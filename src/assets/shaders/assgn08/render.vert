@@ -1,12 +1,9 @@
 attribute vec3 position;
 attribute vec2 texCoord;
-uniform mat4 mvpMatrix;
-uniform mat4 nomalMatrix;
-varying vec3 vNormal;
 varying vec2 vTexCoord;
 
 void main() {
-    vTexCoord = texCoord;
+    vTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);
 
-    gl_Position = mvpMatrix * vec4(position, 1.0);
+    gl_Position = vec4(position, 1.0);
 }
