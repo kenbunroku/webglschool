@@ -103,6 +103,19 @@ class App {
     // Bind to fix this
     this.resize = this.resize.bind(this);
     this.render = this.render.bind(this);
+
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.mouseDx = 0;
+    this.mouseDy = 0;
+
+    window.addEventListener("mousemove", (event) => {
+      this.mouseX = event.clientX / window.innerWidth;
+      this.mouseY = 1.0 - event.clientY / window.innerHeight;
+
+      this.mouseDx = event.movementX / window.innerWidth;
+      this.mouseDy = -event.movementY / window.innerHeight;
+    });
   }
 
   /** Initialization process */
@@ -244,6 +257,10 @@ class App {
     // Get uniform location
     this.renderUniLocation = {
       textureUnit: gl.getUniformLocation(this.renderProgram, "textureUnit"),
+      mouseX: gl.getUniformLocation(this.renderProgram, "mouseX"),
+      mouseY: gl.getUniformLocation(this.renderProgram, "mouseY"),
+      mouseDx: gl.getUniformLocation(this.renderProgram, "mouseDx"),
+      mouseDy: gl.getUniformLocation(this.renderProgram, "mouseDy"),
     };
 
     // Set up offscreen locations
@@ -320,7 +337,7 @@ class App {
     // Call requestAnimationFrame when render flag is true
     if (this.isRender) requestAnimationFrame(this.render);
 
-    const nowTime = (Date.now() - this.startTime) * 0.001;
+    const nowTime = ((Date.now() - this.startTime) * 0.001);
 
     // Set up offscreen rendering
     {
@@ -377,6 +394,10 @@ class App {
         this.planeIBO
       );
       gl.uniform1i(this.renderUniLocation.textureUnit, 0);
+      gl.uniform1f(this.renderUniLocation.mouseX, this.mouseX);
+      gl.uniform1f(this.renderUniLocation.mouseY, this.mouseY);
+      gl.uniform1f(this.renderUniLocation.mouseDx, this.mouseDx);
+      gl.uniform1f(this.renderUniLocation.mouseDy, this.mouseDy);
       gl.drawElements(
         gl.TRIANGLES,
         this.planeGeometry.index.length,
