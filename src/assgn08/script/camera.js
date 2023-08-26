@@ -174,19 +174,19 @@ export class WebGLOrbitCamera {
     Qtn.identity(this.qt)
     Qtn.identity(this.qtx)
     Qtn.identity(this.qty)
-    Qtn.rotate(this.rotateX * PI2, u, this.qtx)
+    // Qtn.rotate(this.rotateX * PI2, u, this.qtx)
     Qtn.toVecIII(v, this.qtx, v)
-    Qtn.rotate(this.rotateY * PI2, v, this.qty)
+    // Qtn.rotate(this.rotateY * PI2, v, this.qty)
     Qtn.multiply(this.qtx, this.qty, this.qt)
     Qtn.toVecIII(this.defaultPosition, this.qt, this.position)
     Qtn.toVecIII(this.defaultUpDirection, this.qt, this.upDirection)
     // translate
-    this.position[0] += this.movePosition[0]
-    this.position[1] += this.movePosition[1]
-    this.position[2] += this.movePosition[2]
-    this.center[0] = this.defaultCenter[0] + this.movePosition[0]
-    this.center[1] = this.defaultCenter[1] + this.movePosition[1]
-    this.center[2] = this.defaultCenter[2] + this.movePosition[2]
+    // this.position[0] += this.movePosition[0]
+    // this.position[1] += this.movePosition[1]
+    // this.position[2] += this.movePosition[2]
+    // this.center[0] = this.defaultCenter[0] + this.movePosition[0]
+    // this.center[1] = this.defaultCenter[1] + this.movePosition[1]
+    // this.center[2] = this.defaultCenter[2] + this.movePosition[2]
 
     return Mat4.lookAt(this.position, this.center, this.upDirection)
   }
