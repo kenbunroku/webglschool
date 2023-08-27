@@ -288,6 +288,8 @@ class App {
       mouseX: gl.getUniformLocation(this.renderProgram, "mouseX"),
       mouseY: gl.getUniformLocation(this.renderProgram, "mouseY"),
       type: gl.getUniformLocation(this.renderProgram, "type"),
+      time: gl.getUniformLocation(this.renderProgram, "time"),
+      aspect: gl.getUniformLocation(this.renderProgram, "aspect"),
     };
 
     // Set up offscreen locations
@@ -424,6 +426,8 @@ class App {
       gl.uniform1f(this.renderUniLocation.mouseX, this.mouseX);
       gl.uniform1f(this.renderUniLocation.mouseY, this.mouseY);
       gl.uniform1i(this.renderUniLocation.type, this.type);
+      gl.uniform1f(this.renderUniLocation.time, nowTime);
+      gl.uniform1f(this.renderUniLocation.aspect, this.canvas.width / this.canvas.height)
       gl.drawElements(
         gl.TRIANGLES,
         this.planeGeometry.index.length,
