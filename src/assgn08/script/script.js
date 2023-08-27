@@ -2,6 +2,7 @@ import { WebGLUtility } from "./webgl.js";
 import { WebGLMath } from "./math.js";
 import { WebGLGeometry } from "./geometry.js";
 import { WebGLOrbitCamera } from "./camera.js";
+import { Pane } from "tweakpane";
 
 import vertexShaderSource from "/@shaders/assgn08/render.vert";
 import fragmentShaderSource from "/@shaders/assgn08/render.frag";
@@ -18,6 +19,18 @@ window.addEventListener(
       app.setupLocation();
       app.start();
     });
+
+    const pane = new Pane();
+    const parameter = {
+      effect: "color",
+    };
+    pane
+      .addInput(parameter, "effect", {
+        options: { Color: "color", Zoom: "zoom", Random: "random" },
+      })
+      .on("change", (v) => {
+        app.setType(v.value);
+      });
   },
   false
 );
@@ -108,6 +121,8 @@ class App {
     this.mouseY = 0;
     this.mouseDx = 0;
     this.mouseDy = 0;
+
+    this.type = 0;
 
     window.addEventListener("mousemove", (event) => {
       this.mouseX = event.clientX / window.innerWidth;
@@ -216,6 +231,19 @@ class App {
     });
   }
 
+  /** Set post effect type
+   * @param {number} value
+   */
+  setType(value) {
+    if (value == "color") {
+      this.type = 0;
+    } else if (value == "zoom") {
+      this.type = 1;
+    } else if (value == "random") {
+      this.type = 2;
+    }
+  }
+
   /** Set up geometry */
   setupGeometry() {
     const color = [1.0, 1.0, 1.0, 1.0];
@@ -259,8 +287,7 @@ class App {
       textureUnit: gl.getUniformLocation(this.renderProgram, "textureUnit"),
       mouseX: gl.getUniformLocation(this.renderProgram, "mouseX"),
       mouseY: gl.getUniformLocation(this.renderProgram, "mouseY"),
-      mouseDx: gl.getUniformLocation(this.renderProgram, "mouseDx"),
-      mouseDy: gl.getUniformLocation(this.renderProgram, "mouseDy"),
+      type: gl.getUniformLocation(this.renderProgram, "type"),
     };
 
     // Set up offscreen locations
@@ -337,7 +364,7 @@ class App {
     // Call requestAnimationFrame when render flag is true
     if (this.isRender) requestAnimationFrame(this.render);
 
-    const nowTime = ((Date.now() - this.startTime) * 0.001);
+    const nowTime = (Date.now() - this.startTime) * 0.001;
 
     // Set up offscreen rendering
     {
@@ -396,8 +423,7 @@ class App {
       gl.uniform1i(this.renderUniLocation.textureUnit, 0);
       gl.uniform1f(this.renderUniLocation.mouseX, this.mouseX);
       gl.uniform1f(this.renderUniLocation.mouseY, this.mouseY);
-      gl.uniform1f(this.renderUniLocation.mouseDx, this.mouseDx);
-      gl.uniform1f(this.renderUniLocation.mouseDy, this.mouseDy);
+      gl.uniform1i(this.renderUniLocation.type, this.type);
       gl.drawElements(
         gl.TRIANGLES,
         this.planeGeometry.index.length,
