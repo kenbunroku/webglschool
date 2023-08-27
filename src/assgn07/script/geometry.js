@@ -701,6 +701,7 @@ export class WebGLGeometry {
 
   static icosphere(order = 0, uvMap = false) {
     const vec3 = WebGLMath.Vec3;
+
     if (order > 10) throw new Error(`Max order is 10, but given ${order}.`);
 
     // set up a 20-triangle icosahedron
@@ -900,6 +901,7 @@ export class WebGLGeometry {
       uv[2 * i + 1] = Math.asin(vertices[3 * i + 1]) / Math.PI + 0.5;
     }
 
+    // This is my original code to fix uv mapping
     const wrapped = [];
     const copiedUv = [...uv];
     const copiedPositions = [...vertices];
