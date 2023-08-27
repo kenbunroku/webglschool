@@ -26,7 +26,7 @@ window.addEventListener(
     };
     pane
       .addInput(parameter, "effect", {
-        options: { Color: "color", Zoom: "zoom", Random: "random" },
+        options: { Color: "color", Zoom: "zoom", Noise: "noise" },
       })
       .on("change", (v) => {
         app.setType(v.value);
@@ -239,7 +239,7 @@ class App {
       this.type = 0;
     } else if (value == "zoom") {
       this.type = 1;
-    } else if (value == "random") {
+    } else if (value == "noise") {
       this.type = 2;
     }
   }
