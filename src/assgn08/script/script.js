@@ -119,8 +119,7 @@ class App {
 
     this.mouseX = 0;
     this.mouseY = 0;
-    this.mouseDx = 0;
-    this.mouseDy = 0;
+    this.velocity = 0.0;
 
     this.type = 0;
 
@@ -130,6 +129,8 @@ class App {
 
       this.mouseDx = event.movementX / window.innerWidth;
       this.mouseDy = -event.movementY / window.innerHeight;
+
+      this.velocity = this.getMouseSpeed(event);
     });
   }
 
@@ -244,6 +245,16 @@ class App {
     }
   }
 
+  /** Get speed of mouse move
+   * @param {event}
+   */
+  getMouseSpeed(event) {
+    const dx = event.movementX / window.innerWidth;
+    const dy = -event.movementY / window.innerHeight;
+
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   /** Set up geometry */
   setupGeometry() {
     const color = [1.0, 1.0, 1.0, 1.0];
@@ -258,7 +269,11 @@ class App {
     this.planeIBO = WebGLUtility.createIBO(this.gl, this.planeGeometry.index);
 
     // Create plane for offscreen program
-    this.offscreenPlaneGeometry = WebGLGeometry.plane(size * 2, size, color);
+    this.offscreenPlaneGeometry = WebGLGeometry.plane(
+      size * 2.0,
+      size * 2.0,
+      color
+    );
     this.offscreenPlaneVBO = [
       WebGLUtility.createVBO(this.gl, this.offscreenPlaneGeometry.position),
       WebGLUtility.createVBO(this.gl, this.offscreenPlaneGeometry.texCoord),
@@ -290,6 +305,8 @@ class App {
       type: gl.getUniformLocation(this.renderProgram, "type"),
       time: gl.getUniformLocation(this.renderProgram, "time"),
       aspect: gl.getUniformLocation(this.renderProgram, "aspect"),
+      velocity: gl.getUniformLocation(this.renderProgram, "velocity"),
+      random: gl.getUniformLocation(this.renderProgram, "random"),
     };
 
     // Set up offscreen locations
@@ -367,6 +384,7 @@ class App {
     if (this.isRender) requestAnimationFrame(this.render);
 
     const nowTime = (Date.now() - this.startTime) * 0.001;
+    const random = Math.random() * this.startTime;
 
     // Set up offscreen rendering
     {
@@ -427,7 +445,12 @@ class App {
       gl.uniform1f(this.renderUniLocation.mouseY, this.mouseY);
       gl.uniform1i(this.renderUniLocation.type, this.type);
       gl.uniform1f(this.renderUniLocation.time, nowTime);
-      gl.uniform1f(this.renderUniLocation.aspect, this.canvas.width / this.canvas.height)
+      gl.uniform1f(
+        this.renderUniLocation.aspect,
+        this.canvas.width / this.canvas.height
+      );
+      gl.uniform1f(this.renderUniLocation.velocity, this.velocity);
+      gl.uniform1f(this.renderUniLocation.random, random);
       gl.drawElements(
         gl.TRIANGLES,
         this.planeGeometry.index.length,
